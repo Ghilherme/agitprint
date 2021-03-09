@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.agitprint">
+    package="com.br.agitprint">
    <application
         android:label="agitprint"
         android:icon="@mipmap/ic_launcher">
