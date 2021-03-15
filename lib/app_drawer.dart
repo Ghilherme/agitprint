@@ -1,3 +1,4 @@
+import 'package:agitprint/registers/people/list_people_admin.dart';
 import 'package:flutter/material.dart';
 
 import './constants.dart';
@@ -20,13 +21,16 @@ class CustomDrawer extends StatelessWidget {
           leading: Icon(Icons.save),
           title: Text('Pessoas'),
           subtitle: Text('Gerenciar pessoas'),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => ListPeopleAdmin()));
+          },
         ),
         ListTile(
           leading: Icon(Icons.login),
           title: Text('Acessos'),
           subtitle: Text('Gerenciar perfis de acesso'),
-          onTap: () async {},
+          onTap: () {},
         )
       ],
     ));

@@ -30,35 +30,36 @@ class CustomTextFormField extends StatelessWidget {
   final double height;
   final EdgeInsetsGeometry contentPadding;
   final EdgeInsetsGeometry textFormFieldMargin;
+  final String initialValue;
 
-  CustomTextFormField({
-    this.prefixIcon,
-    this.suffixIcon,
-    this.textStyle,
-    this.hintTextStyle,
-    this.labelStyle,
-    this.titleStyle,
-    this.titleIcon,
-    this.hasTitleIcon = false,
-    this.title,
-    this.contentPadding,
-    this.textFormFieldMargin,
-    this.hasTitle = false,
-    this.border = Borders.primaryInputBorder,
-    this.focusedBorder = Borders.focusedBorder,
-    this.enabledBorder = Borders.enabledBorder,
-    this.hintText,
-    this.labelText,
-    this.hasPrefixIcon = false,
-    this.hasSuffixIcon = false,
-    this.obscured = false,
-    this.textInputType,
-    this.onChanged,
-    this.validator,
-    this.inputFormatters,
-    this.width,
-    this.height,
-  });
+  CustomTextFormField(
+      {this.prefixIcon,
+      this.suffixIcon,
+      this.textStyle,
+      this.hintTextStyle,
+      this.labelStyle,
+      this.titleStyle,
+      this.titleIcon,
+      this.hasTitleIcon = false,
+      this.title,
+      this.contentPadding,
+      this.textFormFieldMargin,
+      this.hasTitle = false,
+      this.border = Borders.primaryInputBorder,
+      this.focusedBorder = Borders.focusedBorder,
+      this.enabledBorder = Borders.enabledBorder,
+      this.hintText,
+      this.labelText,
+      this.hasPrefixIcon = false,
+      this.hasSuffixIcon = false,
+      this.obscured = false,
+      this.textInputType,
+      this.onChanged,
+      this.validator,
+      this.inputFormatters,
+      this.width,
+      this.height,
+      this.initialValue});
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +83,7 @@ class CustomTextFormField extends StatelessWidget {
             onChanged: onChanged,
             validator: validator,
             inputFormatters: inputFormatters,
+            initialValue: initialValue,
             decoration: InputDecoration(
               contentPadding: contentPadding,
               labelText: labelText,

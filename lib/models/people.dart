@@ -13,7 +13,8 @@ class PeopleModel {
       this.pendingPayments,
       this.imageAvatar,
       this.createdAt,
-      this.lastModification});
+      this.lastModification,
+      this.status});
   String id,
       name,
       email,
@@ -21,14 +22,15 @@ class PeopleModel {
       password,
       directorship,
       regionalGroup,
-      imageAvatar;
+      imageAvatar,
+      status;
   num balance;
   List<dynamic> profiles;
   int pendingPayments;
 
   DateTime lastModification, createdAt;
 
-  PeopleModel.fromContact(PeopleModel people) {
+  PeopleModel.fromPeople(PeopleModel people) {
     this.id = people.id;
     this.name = people.name;
     this.email = people.email;
@@ -42,6 +44,7 @@ class PeopleModel {
     this.imageAvatar = people.imageAvatar;
     this.lastModification = people.lastModification;
     this.createdAt = people.createdAt;
+    this.status = people.status;
   }
   PeopleModel.fromFirestore(QueryDocumentSnapshot snapshot) {
     this.id = snapshot.id;
@@ -61,6 +64,7 @@ class PeopleModel {
     this.createdAt = snapshot.data()['criacao'] == null
         ? null
         : snapshot.data()['criacao'].toDate();
+    this.status = snapshot.data()['status'];
   }
 
   PeopleModel.empty() {
@@ -76,5 +80,6 @@ class PeopleModel {
     this.imageAvatar = '';
     this.lastModification = null;
     this.createdAt = null;
+    this.status = '';
   }
 }
