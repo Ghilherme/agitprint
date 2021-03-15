@@ -1,36 +1,33 @@
 import 'package:agitprint/components/confirmation_dialog.dart';
 import 'package:agitprint/components/list_tile_admin.dart';
 import 'package:agitprint/components/list_view_header.dart';
-import 'package:agitprint/models/people.dart';
-import 'package:agitprint/models/status.dart';
-import 'package:agitprint/registers/people/people_admin.dart';
+import 'package:agitprint/models/directorship.dart';
+import 'package:agitprint/registers/directorship/directorship_admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 
-class ListPeopleAdmin extends StatelessWidget {
-  const ListPeopleAdmin({
+class ListDirectorshipAdmin extends StatelessWidget {
+  const ListDirectorshipAdmin({
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Query query = FirebaseFirestore.instance
-        .collection('pessoas')
-        .orderBy('nome')
-        .where('status', isEqualTo: Status.active);
+    Query query =
+        FirebaseFirestore.instance.collection('diretorias').orderBy('nome');
 
     return Scaffold(
         appBar: AppBar(
             backgroundColor: Colors.redAccent,
-            title: Text("Pessoas"),
+            title: Text("Diretorias"),
             actions: <Widget>[
               IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => PeopleAdmin(
-                              people: PeopleModel.empty(),
+                        builder: (context) => DirectorshipAdmin(
+                              directories: DirectorshipModel.empty(),
                             )));
                   })
             ],
@@ -75,38 +72,31 @@ class ListPeopleAdmin extends StatelessWidget {
       int index, int size) {
     if (index == 0)
       return ListViewHeader(
-        title: size.toString() + ' Pessoas no total',
+        title: size.toString() + ' Diretorias no total',
       );
 
     index -= 1;
-    PeopleModel people = PeopleModel.fromFirestore(snapshot[index]);
+    DirectorshipModel directorship =
+        DirectorshipModel.fromFirestore(snapshot[index]);
 
     return Column(children: <Widget>[
       ListTileAdmin(
         confirmationDialog: ConfirmationDialog(
-          content: 'Nome: ' +
-              people.name +
-              '\nDiretoria: ' +
-              people.directorship +
-              '\nRegional: ' +
-              people.regionalGroup,
+          content: 'Diretoria: ' + directorship.name,
           okFunction: () {
             FirebaseFirestore.instance
-                .collection('pessoas')
-                .doc(people.id)
-                .update({'status': Status.disabled});
+                .collection('diretorias')
+                .doc(directorship.id)
+                .delete();
           },
-          title: 'Deseja desabilitar o contato?',
+          title: 'Deseja excluir a diretoria?',
         ),
-        title: people.name,
-        subtitle: people.directorship +
-            ' ' +
-            people.regionalGroup +
-            '\nCriado em: ' +
-            "${people.createdAt.day.toString().padLeft(2, '0')}-${people.createdAt.month.toString().padLeft(2, '0')}-${people.createdAt.year.toString()} ${people.createdAt.hour.toString().padLeft(2, '0')}:${people.createdAt.minute.toString().padLeft(2, '0')}",
+        title: directorship.name,
+        subtitle: directorship.description,
         editFunction: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => PeopleAdmin(people: people)));
+              builder: (context) =>
+                  DirectorshipAdmin(directories: directorship)));
         },
       ),
       index + 1 == size ? Container() : Divider()

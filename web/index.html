@@ -40,6 +40,29 @@
       });
     }
   </script>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+      https://firebase.google.com/docs/web/setup#available-libraries -->
+  <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-analytics.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    var firebaseConfig = {
+      apiKey: "AIzaSyAe7R7nGN1kTUsl8rXr_PHWuW9wO74ow-M",
+      authDomain: "agitprint-dev.firebaseapp.com",
+      projectId: "agitprint-dev",
+      storageBucket: "agitprint-dev.appspot.com",
+      messagingSenderId: "70478930726",
+      appId: "1:70478930726:web:6dcb1b61f6b54dbd41d7e7",
+      measurementId: "G-5D6B492KS3"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

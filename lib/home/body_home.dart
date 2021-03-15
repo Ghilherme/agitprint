@@ -1,4 +1,5 @@
 import 'package:agitprint/models/people.dart';
+import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -8,9 +9,10 @@ import '../constants.dart';
 class BodyHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    //Pega a tabela categorias
-    Query query =
-        FirebaseFirestore.instance.collection('pessoas').orderBy('nome');
+    Query query = FirebaseFirestore.instance
+        .collection('pessoas')
+        .orderBy('nome')
+        .where('status', isEqualTo: Status.active);
 
     //Cria Stream com essa query
     return StreamBuilder<QuerySnapshot>(

@@ -53,7 +53,10 @@ class CustomButton extends StatelessWidget {
                   title,
                   style: textStyle,
                 )
-              : Container(),
+              : Center(
+                  child: CircularProgressIndicator(
+                  backgroundColor: Colors.white,
+                )),
         ],
       ),
     );

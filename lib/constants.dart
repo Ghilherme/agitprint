@@ -11,6 +11,6 @@ const defaultPaddingListView = 5.0;
 const textLightColor = Color(0xFFACACAC);
 
 List<MultiSelectItem> profiles = [
-  const MultiSelectItem('1', 'admin'),
-  const MultiSelectItem('2', 'admin2')
+  const MultiSelectItem('admin', 'admin'),
+  const MultiSelectItem('admin2', 'admin2')
 ];

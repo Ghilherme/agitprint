@@ -1,30 +1,30 @@
-import 'dart:io';
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
-import 'package:agitprint/components/image_picker.dart';
 import 'package:agitprint/constants.dart';
-import 'package:agitprint/models/people.dart';
+import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 
-class PeopleAdmin extends StatelessWidget {
-  final PeopleModel people;
+class ProvidersAdmin extends StatelessWidget {
+  final ProvidersModel providers;
 
-  const PeopleAdmin({Key key, this.people}) : super(key: key);
+  const ProvidersAdmin({Key key, this.providers}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Colors.redAccent,
-          title: Text('Administrar Pessoas'),
+          title: Text('Administrar Fornecedores'),
           elevation: 0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
@@ -32,41 +32,41 @@ class PeopleAdmin extends StatelessWidget {
               Navigator.of(context).pop();
             },
           )),
-      body: PeopleAdminBody(people),
+      body: ProvidersAdminBody(providers),
     );
   }
 }
 
-class PeopleAdminBody extends StatefulWidget {
-  PeopleAdminBody(this.people);
-  final PeopleModel people;
+class ProvidersAdminBody extends StatefulWidget {
+  ProvidersAdminBody(this.providers);
+  final ProvidersModel providers;
 
   @override
-  _PeopleAdminBodyState createState() => _PeopleAdminBodyState(this.people);
+  _ProvidersAdminBodyState createState() =>
+      _ProvidersAdminBodyState(this.providers);
 }
 
-class _PeopleAdminBodyState extends State<PeopleAdminBody> {
-  _PeopleAdminBodyState(this.people);
-  final PeopleModel people;
+class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
+  _ProvidersAdminBodyState(this.providers);
+  final ProvidersModel providers;
 
   final _form = GlobalKey<FormState>();
-  PeopleModel _peopleModel;
+  ProvidersModel _providersModel;
   bool _progressBarActive = false;
-  String _fileAvatarUpload = '';
-  List<DropdownMenuItem<String>> _items = [];
+  List<DropdownMenuItem<String>> _itemsDropDown = [];
+  List<MultiSelectItem> _itemsMultiSelect = [];
   String _dropdownDirectorship;
 
   initState() {
     super.initState();
     getDirectorships();
-    _peopleModel = PeopleModel.fromPeople(people);
-
-    if (_peopleModel.directorship.isNotEmpty) {
-      _dropdownDirectorship = _peopleModel.directorship;
+    getCategories();
+    _providersModel = ProvidersModel.fromProviders(providers);
+    if (_providersModel.directorship.isNotEmpty) {
+      _dropdownDirectorship = _providersModel.directorship;
     }
-
-    if (_peopleModel.lastModification == null)
-      _peopleModel.lastModification = DateTime.now();
+    if (_providersModel.lastModification == null)
+      _providersModel.lastModification = DateTime.now();
   }
 
   @override
@@ -95,14 +95,6 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     return Column(
       children: <Widget>[
         Container(height: 30),
-        Center(
-          child: ImagePickerSource(
-            image: _peopleModel.imageAvatar,
-            callback: callbackAvatar,
-            isAvatar: true,
-            imageQuality: 35,
-          ),
-        ),
         SizedBox(
           height: defaultPadding,
         ),
@@ -110,7 +102,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           textInputType: TextInputType.text,
           textCapitalization: TextCapitalization.words,
           labelText: "Nome",
-          initialValue: _peopleModel.name,
+          initialValue: _providersModel.name,
           border: Borders.customOutlineInputBorder(),
           enabledBorder: Borders.customOutlineInputBorder(),
           focusedBorder: Borders.customOutlineInputBorder(
@@ -120,7 +112,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           hintTextStyle: GoogleTextStyles.customTextStyle(),
           textStyle: GoogleTextStyles.customTextStyle(),
           onChanged: (value) {
-            _peopleModel.name = value.trim();
+            _providersModel.name = value.trim();
           },
           validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
         ),
@@ -128,73 +120,28 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           height: defaultPadding,
         ),
         CustomTextFormField(
-            textInputType: TextInputType.emailAddress,
-            textCapitalization: TextCapitalization.none,
-            labelText: "Email",
-            initialValue: _peopleModel.email,
-            border: Borders.customOutlineInputBorder(),
-            enabledBorder: Borders.customOutlineInputBorder(),
-            focusedBorder: Borders.customOutlineInputBorder(
-              color: AppColors.violetShade200,
-            ),
-            labelStyle: GoogleTextStyles.customTextStyle(),
-            hintTextStyle: GoogleTextStyles.customTextStyle(),
-            textStyle: GoogleTextStyles.customTextStyle(),
-            onChanged: (value) {
-              _peopleModel.email = value.trim();
-            },
-            validator: (value) {
-              return value.isEmpty
-                  ? 'Campo obrigatório'
-                  : RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                          .hasMatch(value)
-                      ? null
-                      : 'Email inválido';
-            }),
-        SizedBox(
-          height: defaultPadding,
-        ),
-        CustomTextFormField(
-          textInputType: TextInputType.emailAddress,
-          textCapitalization: TextCapitalization.characters,
-          labelText: "Login",
-          initialValue: _peopleModel.login,
+          textInputType: TextInputType.text,
+          textCapitalization: TextCapitalization.words,
+          labelText: "CPF/CNPJ",
+          initialValue: _providersModel.cpf == "" && _providersModel.cnpj == ""
+              ? ""
+              : _providersModel.cpf == ""
+                  ? UtilBrasilFields.obterCnpj(_providersModel.cnpj)
+                  : UtilBrasilFields.obterCpf(_providersModel.cpf),
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            CpfOuCnpjFormatter()
+          ],
           border: Borders.customOutlineInputBorder(),
           enabledBorder: Borders.customOutlineInputBorder(),
           focusedBorder: Borders.customOutlineInputBorder(
-            color: AppColors.violetShade200,
+            color: const Color(0xFF655796),
           ),
           labelStyle: GoogleTextStyles.customTextStyle(),
           hintTextStyle: GoogleTextStyles.customTextStyle(),
           textStyle: GoogleTextStyles.customTextStyle(),
           onChanged: (value) {
-            _peopleModel.login = value.trim();
-          },
-          validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
-        ),
-        SizedBox(
-          height: defaultPadding,
-        ),
-        CustomTextFormField(
-          textInputType: TextInputType.visiblePassword,
-          textCapitalization: TextCapitalization.none,
-          labelText: "Senha",
-          initialValue: _peopleModel.password,
-          hasSuffixIcon: true,
-          suffixIcon: Icon(
-            Icons.lock,
-            color: AppColors.blackShade10,
-          ),
-          border: Borders.customOutlineInputBorder(),
-          enabledBorder: Borders.customOutlineInputBorder(),
-          focusedBorder: Borders.customOutlineInputBorder(
-            color: AppColors.violetShade200,
-          ),
-          labelStyle: GoogleTextStyles.customTextStyle(),
-          hintTextStyle: GoogleTextStyles.customTextStyle(),
-          textStyle: GoogleTextStyles.customTextStyle(),
-          onChanged: (value) {
-            _peopleModel.password = value.trim();
+            _providersModel.name = value.trim();
           },
           validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
         ),
@@ -214,34 +161,15 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
             iconSize: 24,
             elevation: 16,
             onChanged: (String newValue) {
-              _peopleModel.directorship = newValue;
+              _providersModel.directorship = newValue;
               setState(() {
                 _dropdownDirectorship = newValue;
               });
             },
-            items: _items,
+            items: _itemsDropDown,
             style: GoogleTextStyles.customTextStyle(),
           ),
         ),
-        SizedBox(
-          height: defaultPadding,
-        ),
-        CustomTextFormField(
-            textInputType: TextInputType.emailAddress,
-            textCapitalization: TextCapitalization.characters,
-            labelText: "Regional",
-            initialValue: _peopleModel.regionalGroup,
-            border: Borders.customOutlineInputBorder(),
-            enabledBorder: Borders.customOutlineInputBorder(),
-            focusedBorder: Borders.customOutlineInputBorder(
-              color: AppColors.violetShade200,
-            ),
-            labelStyle: GoogleTextStyles.customTextStyle(),
-            hintTextStyle: GoogleTextStyles.customTextStyle(),
-            textStyle: GoogleTextStyles.customTextStyle(),
-            onChanged: (value) {
-              _peopleModel.regionalGroup = value.trim();
-            }),
         SizedBox(
           height: defaultPadding,
         ),
@@ -251,16 +179,21 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
           child: MultiSelectDialogField(
-              initialValue: _peopleModel.profiles,
-              items: profiles,
+              initialValue: _providersModel.categories,
+              items: _itemsMultiSelect.isEmpty
+                  ? _providersModel.categories
+                      .map((prestador) =>
+                          MultiSelectItem<String>(prestador, prestador))
+                      .toList()
+                  : _itemsMultiSelect,
               searchHintStyle: GoogleTextStyles.customTextStyle(),
               searchTextStyle: GoogleTextStyles.customTextStyle(),
               itemsTextStyle: GoogleTextStyles.customTextStyle(),
-              title: Text('Perfis de acesso'),
+              title: Text('Categorias do Fornecedor'),
               listType: MultiSelectListType.CHIP,
               buttonText:
-                  Text('Perfis', style: GoogleTextStyles.customTextStyle()),
-              onConfirm: (results) => _peopleModel.profiles = results,
+                  Text('Categorias', style: GoogleTextStyles.customTextStyle()),
+              onConfirm: (results) => _providersModel.categories = results,
               validator: (value) =>
                   value == null || value.isEmpty ? 'Campo obrigatório' : null),
         ),
@@ -293,19 +226,6 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     );
   }
 
-  callbackAvatar(file) {
-    setState(() {
-      _fileAvatarUpload = file;
-    });
-  }
-
-  Future<String> uploadFileImage(String refPath, String filePath) async {
-    File file = File(filePath);
-
-    await FirebaseStorage.instance.ref(refPath).putFile(file);
-    return await FirebaseStorage.instance.ref(refPath).getDownloadURL();
-  }
-
   void saveContact() async {
     if (_form.currentState.validate()) {
       setState(() {
@@ -313,44 +233,31 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
       });
 
       //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
-      DocumentReference contactDB =
-          FirebaseFirestore.instance.collection('pessoas').doc(_peopleModel.id);
+      DocumentReference contactDB = FirebaseFirestore.instance
+          .collection('fornecedores')
+          .doc(_providersModel.id);
 
-      //Se houve alteração na imagem, faz um novo upload
-      if (_fileAvatarUpload.isNotEmpty)
-        _peopleModel.imageAvatar = await uploadFileImage(
-            'uploads/' + contactDB.id + '/' + contactDB.id + '_avatar.png',
-            _fileAvatarUpload);
+      if (_providersModel.createdAt == null)
+        _providersModel.createdAt = DateTime.now();
 
-      if (_peopleModel.createdAt == null)
-        _peopleModel.createdAt = DateTime.now();
-
-      _peopleModel.lastModification = DateTime.now();
+      _providersModel.lastModification = DateTime.now();
 
       //Criado pela area administrativa é sempre ativo
-      _peopleModel.status = Status.active;
+      _providersModel.status = Status.active;
 
       contactDB
           .set({
-            'nome': _peopleModel.name,
-            'email': _peopleModel.email,
-            'login': _peopleModel.login,
-            'senha': _peopleModel.password,
-            'saldo': _peopleModel.balance,
-            'perfil': _peopleModel.profiles,
-            'diretoria': _peopleModel.directorship,
-            'regional': _peopleModel.regionalGroup,
-            'pagamentospendentes': _peopleModel.pendingPayments,
-            'avatar': _peopleModel.imageAvatar,
-            'atualizacao': _peopleModel.lastModification,
-            'criacao': _peopleModel.createdAt,
-            'status': _peopleModel.status,
+            'nome': _providersModel.name,
+            'diretoria': _providersModel.directorship,
+            'atualizacao': _providersModel.lastModification,
+            'criacao': _providersModel.createdAt,
+            'status': _providersModel.status,
           })
           .then((value) => showDialog(
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: _peopleModel.id == null
+                    title: _providersModel.id == null
                         ? Text('Pessoa adicionada com sucesso.')
                         : Text('Pessoa atualizada com sucesso.'),
                     actions: <Widget>[
@@ -366,13 +273,13 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
               ))
           .then((value) => setState(() {
                 _progressBarActive = false;
-                _peopleModel.id = contactDB.id;
+                _providersModel.id = contactDB.id;
               }))
           .catchError((error) => showDialog(
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: _peopleModel.id == null
+                    title: _providersModel.id == null
                         ? Text('Falha ao adicionar Pessoa.')
                         : Text('Falha ao atualizar Pessoa.'),
                     content: Text('Erro: ' + error),
@@ -396,11 +303,29 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
   void getDirectorships() async {
     List<String> directorships = await Gets.getDirectorships();
     setState(() {
-      _items = directorships
+      _itemsDropDown = directorships
           .map((dir) => DropdownMenuItem<String>(
                 child: Text(dir),
                 value: dir,
               ))
+          .toList();
+    });
+  }
+
+  Future<void> getCategories() async {
+    List<String> categories = [];
+    await FirebaseFirestore.instance
+        .collection('categorias')
+        .orderBy('nome')
+        .get()
+        .then((value) {
+      value.docs.forEach((element) {
+        return categories.add(element.data()['nome']);
+      });
+    });
+    setState(() {
+      _itemsMultiSelect = categories
+          .map((cate) => MultiSelectItem<String>(cate, cate))
           .toList();
     });
   }

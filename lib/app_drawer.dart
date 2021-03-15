@@ -1,4 +1,7 @@
+import 'package:agitprint/registers/categories/list_categories_admin.dart';
+import 'package:agitprint/registers/directorship/list_directorship_admin.dart';
 import 'package:agitprint/registers/people/list_people_admin.dart';
+import 'package:agitprint/registers/providers/list_providers_admin.dart';
 import 'package:flutter/material.dart';
 
 import './constants.dart';
@@ -13,12 +16,7 @@ class CustomDrawer extends StatelessWidget {
             accountName: Text(mainTitleApp),
             accountEmail: Text('email do logado')),
         ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text('Fornecedores'),
-            subtitle: Text('Gerenciar fornecedores'),
-            onTap: () {}),
-        ListTile(
-          leading: Icon(Icons.save),
+          leading: Icon(Icons.people),
           title: Text('Pessoas'),
           subtitle: Text('Gerenciar pessoas'),
           onTap: () {
@@ -27,7 +25,31 @@ class CustomDrawer extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.login),
+            leading: Icon(Icons.business),
+            title: Text('Diretorias'),
+            subtitle: Text('Gerenciar diretorias'),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ListDirectorshipAdmin()));
+            }),
+        ListTile(
+            leading: Icon(Icons.payments),
+            title: Text('Fornecedores'),
+            subtitle: Text('Gerenciar fornecedores'),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ListProvidersAdmin()));
+            }),
+        ListTile(
+            leading: Icon(Icons.category),
+            title: Text('Categorias'),
+            subtitle: Text('Gerenciar categorias de fornecedores'),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ListCategoriesAdmin()));
+            }),
+        ListTile(
+          leading: Icon(Icons.no_encryption),
           title: Text('Acessos'),
           subtitle: Text('Gerenciar perfis de acesso'),
           onTap: () {},

@@ -2,35 +2,37 @@ import 'package:agitprint/components/confirmation_dialog.dart';
 import 'package:agitprint/components/list_tile_admin.dart';
 import 'package:agitprint/components/list_view_header.dart';
 import 'package:agitprint/models/people.dart';
+import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:agitprint/registers/people/people_admin.dart';
+import 'package:agitprint/registers/providers/providers_admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 
-class ListPeopleAdmin extends StatelessWidget {
-  const ListPeopleAdmin({
+class ListProvidersAdmin extends StatelessWidget {
+  const ListProvidersAdmin({
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     Query query = FirebaseFirestore.instance
-        .collection('pessoas')
+        .collection('fornecedores')
         .orderBy('nome')
         .where('status', isEqualTo: Status.active);
 
     return Scaffold(
         appBar: AppBar(
             backgroundColor: Colors.redAccent,
-            title: Text("Pessoas"),
+            title: Text("Fornecedores"),
             actions: <Widget>[
               IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => PeopleAdmin(
-                              people: PeopleModel.empty(),
+                        builder: (context) => ProvidersAdmin(
+                              providers: ProvidersModel.empty(),
                             )));
                   })
             ],
@@ -75,38 +77,38 @@ class ListPeopleAdmin extends StatelessWidget {
       int index, int size) {
     if (index == 0)
       return ListViewHeader(
-        title: size.toString() + ' Pessoas no total',
+        title: size.toString() + ' Fornecedores no total',
       );
 
     index -= 1;
-    PeopleModel people = PeopleModel.fromFirestore(snapshot[index]);
+    ProvidersModel providers = ProvidersModel.fromFirestore(snapshot[index]);
 
     return Column(children: <Widget>[
       ListTileAdmin(
         confirmationDialog: ConfirmationDialog(
           content: 'Nome: ' +
-              people.name +
+              providers.name +
               '\nDiretoria: ' +
-              people.directorship +
-              '\nRegional: ' +
-              people.regionalGroup,
+              providers.directorship +
+              '\nCategoria: ' +
+              providers.categories.first,
           okFunction: () {
             FirebaseFirestore.instance
-                .collection('pessoas')
-                .doc(people.id)
+                .collection('fornecedores')
+                .doc(providers.id)
                 .update({'status': Status.disabled});
           },
-          title: 'Deseja desabilitar o contato?',
+          title: 'Deseja desabilitar o fornecedor?',
         ),
-        title: people.name,
-        subtitle: people.directorship +
+        title: providers.name,
+        subtitle: providers.directorship +
             ' ' +
-            people.regionalGroup +
+            providers.categories.first +
             '\nCriado em: ' +
-            "${people.createdAt.day.toString().padLeft(2, '0')}-${people.createdAt.month.toString().padLeft(2, '0')}-${people.createdAt.year.toString()} ${people.createdAt.hour.toString().padLeft(2, '0')}:${people.createdAt.minute.toString().padLeft(2, '0')}",
+            "${providers.createdAt.day.toString().padLeft(2, '0')}-${providers.createdAt.month.toString().padLeft(2, '0')}-${providers.createdAt.year.toString()} ${providers.createdAt.hour.toString().padLeft(2, '0')}:${providers.createdAt.minute.toString().padLeft(2, '0')}",
         editFunction: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => PeopleAdmin(people: people)));
+              builder: (context) => ProvidersAdmin(providers: providers)));
         },
       ),
       index + 1 == size ? Container() : Divider()

@@ -98,8 +98,7 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
               _imageFile == null
                   ? Container(
                       height: 200,
-                      child: RaisedButton.icon(
-                        color: Colors.grey[300],
+                      child: ElevatedButton.icon(
                         label: Text('Imagem de fundo'),
                         icon: Icon(Icons.add_a_photo, color: Colors.grey[600]),
                         onPressed: () {

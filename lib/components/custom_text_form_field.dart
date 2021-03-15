@@ -31,6 +31,8 @@ class CustomTextFormField extends StatelessWidget {
   final EdgeInsetsGeometry contentPadding;
   final EdgeInsetsGeometry textFormFieldMargin;
   final String initialValue;
+  final TextCapitalization textCapitalization;
+  final int maxLines;
 
   CustomTextFormField(
       {this.prefixIcon,
@@ -59,7 +61,9 @@ class CustomTextFormField extends StatelessWidget {
       this.inputFormatters,
       this.width,
       this.height,
-      this.initialValue});
+      this.initialValue,
+      this.textCapitalization,
+      this.maxLines = 1});
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +76,13 @@ class CustomTextFormField extends StatelessWidget {
             hasTitle ? Text(title, style: titleStyle) : Container(),
           ],
         ),
-//        hasTitle ? SpaceH4() : Container(),
         Container(
           width: width,
           height: height,
           margin: textFormFieldMargin,
           child: TextFormField(
+            maxLines: maxLines,
+            textCapitalization: textCapitalization,
             style: textStyle,
             keyboardType: textInputType,
             onChanged: onChanged,
