@@ -49,7 +49,6 @@ class ProvidersModel {
   }
 
   ProvidersModel.empty() {
-    this.id = '';
     this.name = '';
     this.cpf = '';
     this.cnpj = '';

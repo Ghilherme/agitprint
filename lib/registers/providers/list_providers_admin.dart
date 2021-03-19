@@ -1,10 +1,8 @@
 import 'package:agitprint/components/confirmation_dialog.dart';
 import 'package:agitprint/components/list_tile_admin.dart';
 import 'package:agitprint/components/list_view_header.dart';
-import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
-import 'package:agitprint/registers/people/people_admin.dart';
 import 'package:agitprint/registers/providers/providers_admin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';

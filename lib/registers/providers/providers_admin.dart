@@ -1,14 +1,17 @@
 import 'package:agitprint/apis/gets.dart';
+import 'package:agitprint/components/bank_card.dart';
 import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/constants.dart';
+import 'package:agitprint/models/bank_accounts.dart';
 import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cpfcnpj/cpfcnpj.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
@@ -120,14 +123,14 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
           height: defaultPadding,
         ),
         CustomTextFormField(
-          textInputType: TextInputType.text,
-          textCapitalization: TextCapitalization.words,
+          textInputType: TextInputType.number,
+          textCapitalization: TextCapitalization.none,
           labelText: "CPF/CNPJ",
           initialValue: _providersModel.cpf == "" && _providersModel.cnpj == ""
               ? ""
               : _providersModel.cpf == ""
-                  ? UtilBrasilFields.obterCnpj(_providersModel.cnpj)
-                  : UtilBrasilFields.obterCpf(_providersModel.cpf),
+                  ? CNPJ.format(_providersModel.cnpj)
+                  : CPF.format(_providersModel.cpf),
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             CpfOuCnpjFormatter()
@@ -141,7 +144,15 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
           hintTextStyle: GoogleTextStyles.customTextStyle(),
           textStyle: GoogleTextStyles.customTextStyle(),
           onChanged: (value) {
-            _providersModel.name = value.trim();
+            if (CPF.isValid(value)) {
+              _providersModel.cpf = value.trim();
+              _providersModel.cnpj = '';
+            }
+
+            if (CNPJ.isValid(value)) {
+              _providersModel.cnpj = value.trim();
+              _providersModel.cpf = '';
+            }
           },
           validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
         ),
@@ -200,6 +211,15 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
+        SizedBox(
+          height: defaultPadding,
+        ),
+        Column(
+          children: _buildCards(_providersModel.banks),
+        ),
+        SizedBox(
+          height: defaultPadding,
+        ),
         Container(
           width: 180,
           decoration: BoxDecoration(boxShadow: [
@@ -248,7 +268,11 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
       contactDB
           .set({
             'nome': _providersModel.name,
+            'cpf': _providersModel.cpf,
+            'cnpj': _providersModel.cnpj,
             'diretoria': _providersModel.directorship,
+            'categorias': _providersModel.categories,
+            'contas': {_providersModel.banks},
             'atualizacao': _providersModel.lastModification,
             'criacao': _providersModel.createdAt,
             'status': _providersModel.status,
@@ -302,14 +326,16 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
 
   void getDirectorships() async {
     List<String> directorships = await Gets.getDirectorships();
-    setState(() {
-      _itemsDropDown = directorships
-          .map((dir) => DropdownMenuItem<String>(
-                child: Text(dir),
-                value: dir,
-              ))
-          .toList();
-    });
+    if (this.mounted) {
+      setState(() {
+        _itemsDropDown = directorships
+            .map((dir) => DropdownMenuItem<String>(
+                  child: Text(dir),
+                  value: dir,
+                ))
+            .toList();
+      });
+    }
   }
 
   Future<void> getCategories() async {
@@ -323,10 +349,23 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         return categories.add(element.data()['nome']);
       });
     });
-    setState(() {
-      _itemsMultiSelect = categories
-          .map((cate) => MultiSelectItem<String>(cate, cate))
-          .toList();
+    if (this.mounted) {
+      setState(() {
+        _itemsMultiSelect = categories
+            .map((cate) => MultiSelectItem<String>(cate, cate))
+            .toList();
+      });
+    }
+  }
+
+  List<Widget> _buildCards(List<BankAccountModel> banks) {
+    List<Widget> list = [];
+    banks.forEach((element) {
+      list.add(new BankCard(isEditable: true, bank: element));
+      list.add(new SizedBox(
+        height: defaultPadding,
+      ));
     });
+    return list;
   }
 }

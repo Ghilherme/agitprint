@@ -36,6 +36,12 @@ class BankAccountModel {
     this.agency = '';
     this.account = '';
     this.savingAccount = '';
-    this.pix = Map<String, dynamic>();
+    this.pix = {
+      'cpf': '',
+      'cnpj': '',
+      'chave': '',
+      'telefone': '',
+      'email': ''
+    };
   }
 }
