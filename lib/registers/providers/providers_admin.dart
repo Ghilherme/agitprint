@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/bank_card.dart';
 import 'package:agitprint/components/borders.dart';
@@ -154,7 +156,12 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
               _providersModel.cpf = '';
             }
           },
-          validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
+          validator: (value) {
+            if (value.isEmpty)
+              return 'Campo obrigatório';
+            else
+              return null;
+          },
         ),
         SizedBox(
           height: defaultPadding,
@@ -220,6 +227,13 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
+        BankCard(
+          isEmpty: true,
+          bank: BankAccountModel.empty(),
+        ),
+        SizedBox(
+          height: defaultPadding,
+        ),
         Container(
           width: 180,
           decoration: BoxDecoration(boxShadow: [
@@ -265,6 +279,24 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
       //Criado pela area administrativa é sempre ativo
       _providersModel.status = Status.active;
 
+      //monta as contas do fornecedor
+      List<dynamic> _bankAccounts = [];
+      _providersModel.banks.forEach((element) {
+        _bankAccounts.add({
+          'codbanco': element.bankCod,
+          'banco': element.bank,
+          'agencia': element.agency,
+          'conta': element.account,
+          'contapoupanca': element.savingAccount,
+          'pix': {
+            'cpf': element.pix['cpf'],
+            'cnpj': element.pix['cnpj'],
+            'telefone': element.pix['telefone'],
+            'email': element.pix['email'],
+          },
+        });
+      });
+
       contactDB
           .set({
             'nome': _providersModel.name,
@@ -272,7 +304,7 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
             'cnpj': _providersModel.cnpj,
             'diretoria': _providersModel.directorship,
             'categorias': _providersModel.categories,
-            'contas': {_providersModel.banks},
+            'contas': _bankAccounts,
             'atualizacao': _providersModel.lastModification,
             'criacao': _providersModel.createdAt,
             'status': _providersModel.status,
@@ -282,8 +314,8 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
                 builder: (context) {
                   return AlertDialog(
                     title: _providersModel.id == null
-                        ? Text('Pessoa adicionada com sucesso.')
-                        : Text('Pessoa atualizada com sucesso.'),
+                        ? Text('Fornecedor adicionado com sucesso.')
+                        : Text('Fornecedor atualizada com sucesso.'),
                     actions: <Widget>[
                       TextButton(
                         child: Text('Ok'),
@@ -304,8 +336,8 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
                 builder: (context) {
                   return AlertDialog(
                     title: _providersModel.id == null
-                        ? Text('Falha ao adicionar Pessoa.')
-                        : Text('Falha ao atualizar Pessoa.'),
+                        ? Text('Falha ao adicionar Fornecedor.')
+                        : Text('Falha ao atualizar Fornecedor.'),
                     content: Text('Erro: ' + error),
                     actions: <Widget>[
                       TextButton(

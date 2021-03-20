@@ -38,7 +38,6 @@ class ProvidersModel {
     this.directorship = snapshot.data()['diretoria'];
     this.categories = snapshot.data()['categorias'];
     this.banks = getAccounts(snapshot.data()['contas']);
-
     this.lastModification = snapshot.data()['atualizacao'] == null
         ? null
         : snapshot.data()['atualizacao'].toDate();
@@ -60,9 +59,9 @@ class ProvidersModel {
     this.status = '';
   }
 
-  List<BankAccountModel> getAccounts(Map<String, dynamic> data) {
+  List<BankAccountModel> getAccounts(List<dynamic> data) {
     List<BankAccountModel> banks = [];
-    data.forEach((key, value) {
+    data.forEach((value) {
       banks.add(new BankAccountModel(
           bankCod: value['codbanco'],
           bank: value['banco'],

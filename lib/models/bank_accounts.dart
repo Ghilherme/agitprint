@@ -36,12 +36,6 @@ class BankAccountModel {
     this.agency = '';
     this.account = '';
     this.savingAccount = '';
-    this.pix = {
-      'cpf': '',
-      'cnpj': '',
-      'chave': '',
-      'telefone': '',
-      'email': ''
-    };
+    this.pix = {'cpf': '', 'cnpj': '', 'telefone': '', 'email': ''};
   }
 }
