@@ -12,11 +12,11 @@ import 'colors.dart';
 import 'custom_text_form_field.dart';
 
 class BankCard extends StatefulWidget {
-  BankCard({Key key, this.bank, this.isEditable = false, this.isEmpty = false})
+  BankCard({Key key, this.bank, this.isEditable = false, this.callback})
       : super(key: key);
   BankAccountModel bank;
   bool isEditable;
-  bool isEmpty;
+  final Function(BankAccountModel) callback;
 
   @override
   _BankCardState createState() => _BankCardState();
@@ -27,13 +27,13 @@ class _BankCardState extends State<BankCard> {
 
   initState() {
     super.initState();
-    if (widget.bank != null)
-      _bank = BankAccountModel.fromBankAccount(widget.bank);
   }
 
   @override
   Widget build(BuildContext context) {
     final _media = MediaQuery.of(context).size;
+    if (widget.bank != null)
+      _bank = BankAccountModel.fromBankAccount(widget.bank);
     return Material(
       elevation: 1,
       shadowColor: Colors.grey.shade300,
@@ -41,220 +41,198 @@ class _BankCardState extends State<BankCard> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
-      child: widget.isEmpty
-          ? Container(
-              width: _media.width - 40,
-              height: 150,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(
+      child: Stack(
+        children: <Widget>[
+          widget.isEditable
+              ? Positioned(
+                  top: 50,
+                  right: 5,
+                  child: Container(
+                    padding: EdgeInsets.all(0),
                     child: IconButton(
-                      icon: Icon(Icons.add),
-                      iconSize: 40,
+                      icon: Icon(
+                        Icons.edit_rounded,
+                        size: 20,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () => buildDialog(context),
+                    ),
+                  ))
+              : Container(),
+          widget.isEditable
+              ? Positioned(
+                  bottom: 20,
+                  right: 5,
+                  child: Container(
+                    padding: EdgeInsets.all(0),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.edit_rounded,
+                        size: 20,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () => buildDialogPix(context),
+                    ),
+                  ),
+                )
+              : Container(),
+          widget.isEditable
+              ? Positioned(
+                  top: -10,
+                  left: -10,
+                  child: Container(
+                    padding: EdgeInsets.all(0),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.remove_circle,
+                        size: 20,
+                        color: Colors.redAccent,
+                      ),
                       onPressed: () {
                         setState(() {
-                          widget.isEmpty = false;
-                          widget.isEditable = true;
-                          _updateWidget();
+                          widget.callback(widget.bank);
+                          widget.bank = null;
+                          widget.isEditable = false;
                         });
                       },
                     ),
-                  )
-                ],
-              ))
-          : Stack(
+                  ),
+                )
+              : Container(),
+          Positioned(
+            top: 15,
+            left: 30,
+            child: Container(
+              padding: EdgeInsets.all(0),
+              child: Text(
+                _bank.bankCod,
+                style: GoogleTextStyles.customTextStyle(),
+              ),
+            ),
+          ),
+          Container(
+            width: _media.width - 40,
+            padding: EdgeInsets.all(30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                widget.isEditable
-                    ? Positioned(
-                        top: 50,
-                        right: 5,
-                        child: Container(
-                          padding: EdgeInsets.all(0),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.edit_rounded,
-                              size: 20,
-                              color: Colors.redAccent,
-                            ),
-                            onPressed: () => buildDialog(context),
-                          ),
-                        ))
-                    : Container(),
-                widget.isEditable
-                    ? Positioned(
-                        bottom: 20,
-                        right: 5,
-                        child: Container(
-                          padding: EdgeInsets.all(0),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.edit_rounded,
-                              size: 20,
-                              color: Colors.redAccent,
-                            ),
-                            onPressed: () => buildDialogPix(context),
-                          ),
-                        ),
-                      )
-                    : Container(),
-                widget.isEditable
-                    ? Positioned(
-                        top: -10,
-                        left: -10,
-                        child: Container(
-                          padding: EdgeInsets.all(0),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.remove_circle,
-                              size: 20,
-                              color: Colors.redAccent,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                widget.isEmpty = true;
-                                widget.isEditable = false;
-                                widget.bank = null;
-                              });
-                            },
-                          ),
-                        ),
-                      )
-                    : Container(),
-                Positioned(
-                  top: 15,
-                  left: 30,
-                  child: Container(
-                    padding: EdgeInsets.all(0),
-                    child: Text(
-                      _bank.bankCod,
-                      style: GoogleTextStyles.customTextStyle(),
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  _bank.bank == '' ? 'Banco' : _bank.bank,
+                  style: Theme.of(context).textTheme.headline6.copyWith(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text("Agencia: " + _bank.agency,
+                    style: GoogleTextStyles.customTextStyle()),
+                SizedBox(height: 10),
+                Text(
+                  _bank.savingAccount.isEmpty
+                      ? "Conta Corrente: " + _bank.account
+                      : "Conta Poupança: " + _bank.savingAccount,
+                  style: GoogleTextStyles.customTextStyle(),
+                ),
+                SizedBox(height: 25),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text("PIX:",
+                        style: GoogleFonts.roboto(
+                          fontSize: 18,
+                          color: AppColors.blackShade3,
+                          fontWeight: FontWeight.bold,
+                        )),
+                    SizedBox(
+                      width: 10,
                     ),
-                  ),
-                ),
-                Container(
-                  width: _media.width - 40,
-                  padding: EdgeInsets.all(30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Text(
-                        _bank.bank == '' ? 'Banco' : _bank.bank,
-                        style: Theme.of(context).textTheme.headline6.copyWith(
-                            color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text("Agencia: " + _bank.agency,
-                          style: GoogleTextStyles.customTextStyle()),
-                      SizedBox(height: 10),
-                      Text(
-                        _bank.savingAccount.isEmpty
-                            ? "Conta Corrente: " + _bank.account
-                            : "Conta Poupança: " + _bank.savingAccount,
-                        style: GoogleTextStyles.customTextStyle(),
-                      ),
-                      SizedBox(height: 25),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text("PIX:",
-                              style: GoogleFonts.roboto(
-                                fontSize: 18,
-                                color: AppColors.blackShade3,
-                                fontWeight: FontWeight.bold,
-                              )),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  _bank.pix['cpf'] == ""
-                                      ? Container()
-                                      : Text(
-                                          'CPF: ' +
-                                              ValidatorUtils.obterCpf(
-                                                  _bank.pix['cpf']),
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 15,
-                                            color: Colors.grey.shade400,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  _bank.pix['cnpj'] == ""
-                                      ? Container()
-                                      : Text(
-                                          'CNPJ: ' +
-                                              ValidatorUtils.obterCnpj(
-                                                  _bank.pix['cnpj']),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey.shade400,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  _bank.pix['telefone'] == ""
-                                      ? Container()
-                                      : Text(
-                                          'Telefone: ' +
-                                              ValidatorUtils.obterTelefone(
-                                                  _bank.pix['telefone']),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey.shade400,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  _bank.pix['email'] == ""
-                                      ? Container()
-                                      : Text('Email: ' + _bank.pix['email'],
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey.shade400,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                ],
-                              )
-                            ],
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 15,
-                  right: 15,
-                  child: Container(
-                    height: 23,
-                    width: 47,
-                    color: Color(0xFF015FFF),
-                    padding: EdgeInsets.all(7),
-                    child: Image.network(
-                      'https://resources.mynewsdesk.com/image/upload/ojf8ed4taaxccncp6pcp.png',
-                      width: 50,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            _bank.pix['cpf'] == ""
+                                ? Container()
+                                : Text(
+                                    'CPF: ' +
+                                        ValidatorUtils.obterCpf(
+                                            _bank.pix['cpf']),
+                                    style: GoogleFonts.roboto(
+                                      fontSize: 15,
+                                      color: Colors.grey.shade400,
+                                      fontWeight: FontWeight.bold,
+                                    )),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            _bank.pix['cnpj'] == ""
+                                ? Container()
+                                : Text(
+                                    'CNPJ: ' +
+                                        ValidatorUtils.obterCnpj(
+                                            _bank.pix['cnpj']),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade400,
+                                      fontWeight: FontWeight.bold,
+                                    )),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            _bank.pix['telefone'] == ""
+                                ? Container()
+                                : Text(
+                                    'Telefone: ' +
+                                        ValidatorUtils.obterTelefone(
+                                            _bank.pix['telefone']),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade400,
+                                      fontWeight: FontWeight.bold,
+                                    )),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            _bank.pix['email'] == ""
+                                ? Container()
+                                : Text('Email: ' + _bank.pix['email'],
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade400,
+                                      fontWeight: FontWeight.bold,
+                                    )),
+                          ],
+                        )
+                      ],
+                    )
+                  ],
+                )
               ],
             ),
+          ),
+          Positioned(
+            top: 15,
+            right: 15,
+            child: Container(
+              height: 23,
+              width: 47,
+              color: Color(0xFF015FFF),
+              padding: EdgeInsets.all(7),
+              child: Image.network(
+                'https://resources.mynewsdesk.com/image/upload/ojf8ed4taaxccncp6pcp.png',
+                width: 50,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

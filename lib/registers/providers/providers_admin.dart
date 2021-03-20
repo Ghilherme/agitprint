@@ -146,21 +146,23 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
           hintTextStyle: GoogleTextStyles.customTextStyle(),
           textStyle: GoogleTextStyles.customTextStyle(),
           onChanged: (value) {
-            if (CPF.isValid(value)) {
-              _providersModel.cpf = value.trim();
-              _providersModel.cnpj = '';
-            }
-
-            if (CNPJ.isValid(value)) {
-              _providersModel.cnpj = value.trim();
-              _providersModel.cpf = '';
-            }
+            _providersModel.cpf = value.trim();
+            _providersModel.cnpj = value.trim();
           },
           validator: (value) {
-            if (value.isEmpty)
-              return 'Campo obrigatório';
-            else
+            if (value.isEmpty) return 'Campo obrigatório';
+
+            if (CPF.isValid(_providersModel.cpf)) {
+              _providersModel.cnpj = '';
               return null;
+            }
+
+            if (CNPJ.isValid(_providersModel.cnpj)) {
+              _providersModel.cpf = '';
+              return null;
+            }
+
+            return 'Campo inválido';
           },
         ),
         SizedBox(
@@ -227,10 +229,35 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        BankCard(
-          isEmpty: true,
-          bank: BankAccountModel.empty(),
-        ),
+        Material(
+            elevation: 1,
+            shadowColor: Colors.grey.shade300,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Stack(children: [
+              Container(
+                  width: MediaQuery.of(context).size.width - 40,
+                  height: 170,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Center(
+                        child: IconButton(
+                          icon: Icon(Icons.add),
+                          iconSize: 40,
+                          onPressed: () {
+                            setState(() {
+                              _providersModel.banks
+                                  .add(new BankAccountModel.empty());
+                            });
+                          },
+                        ),
+                      )
+                    ],
+                  )),
+            ])),
         SizedBox(
           height: defaultPadding,
         ),
@@ -258,6 +285,14 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         ),
       ],
     );
+  }
+
+  callbackBankCard(bank) {
+    setState(() {
+      _providersModel.banks.remove(bank);
+      if (_providersModel.banks.length == 0)
+        _providersModel.banks.add(BankAccountModel.empty());
+    });
   }
 
   void saveContact() async {
@@ -393,7 +428,8 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
   List<Widget> _buildCards(List<BankAccountModel> banks) {
     List<Widget> list = [];
     banks.forEach((element) {
-      list.add(new BankCard(isEditable: true, bank: element));
+      list.add(new BankCard(
+          isEditable: true, bank: element, callback: callbackBankCard));
       list.add(new SizedBox(
         height: defaultPadding,
       ));
