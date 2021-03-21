@@ -1,6 +1,8 @@
+import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/components/validators_utils.dart';
 import 'package:agitprint/models/bank_accounts.dart';
+import 'package:agitprint/models/banks.dart';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:cpfcnpj/cpfcnpj.dart';
 import 'package:flutter/material.dart';
@@ -24,9 +26,12 @@ class BankCard extends StatefulWidget {
 
 class _BankCardState extends State<BankCard> {
   BankAccountModel _bank = BankAccountModel.empty();
+  BankModel _dropdownBanks;
+  List<DropdownMenuItem<BankModel>> _itemsDropDown = [];
 
   initState() {
     super.initState();
+    getBanks();
   }
 
   @override
@@ -34,6 +39,12 @@ class _BankCardState extends State<BankCard> {
     final _media = MediaQuery.of(context).size;
     if (widget.bank != null)
       _bank = BankAccountModel.fromBankAccount(widget.bank);
+
+    if (widget.bank.bankCod.isNotEmpty && _itemsDropDown.length != 0)
+      _dropdownBanks = _itemsDropDown
+          .where((element) => element.value.bankCod == widget.bank.bankCod)
+          .first
+          .value;
     return Material(
       elevation: 1,
       shadowColor: Colors.grey.shade300,
@@ -247,22 +258,32 @@ class _BankCardState extends State<BankCard> {
               padding: const EdgeInsets.all(defaultPadding),
               child: Column(
                 children: [
-                  CustomTextFormField(
-                      textInputType: TextInputType.text,
-                      textCapitalization: TextCapitalization.words,
-                      labelText: "Banco",
-                      initialValue: _bank.bank,
-                      border: Borders.customOutlineInputBorder(),
-                      enabledBorder: Borders.customOutlineInputBorder(),
-                      focusedBorder: Borders.customOutlineInputBorder(
-                        color: const Color(0xFF655796),
+                  StatefulBuilder(builder:
+                      (BuildContext context, StateSetter dropDownState) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.grey),
+                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                      child: DropdownButton<BankModel>(
+                        isExpanded: true,
+                        hint: Text('Bancos'),
+                        value: _dropdownBanks,
+                        icon: Icon(Icons.arrow_downward),
+                        iconSize: 24,
+                        elevation: 16,
+                        onChanged: (newValue) {
+                          dropDownState(() {
+                            _bank.bankCod = newValue.bankCod;
+                            _bank.bank = newValue.name;
+                            _dropdownBanks = newValue;
+                          });
+                        },
+                        items: _itemsDropDown,
+                        style: GoogleTextStyles.customTextStyle(),
                       ),
-                      labelStyle: GoogleTextStyles.customTextStyle(),
-                      hintTextStyle: GoogleTextStyles.customTextStyle(),
-                      textStyle: GoogleTextStyles.customTextStyle(),
-                      onChanged: (value) {
-                        _bank.bank = value.trim();
-                      }),
+                    );
+                  }),
                   SizedBox(
                     height: defaultPadding,
                   ),
@@ -462,11 +483,27 @@ class _BankCardState extends State<BankCard> {
     );
   }
 
+  void getBanks() async {
+    List<BankModel> _banks = await Gets.readBankJson();
+    if (this.mounted) {
+      setState(() {
+        _itemsDropDown =
+            _banks.map<DropdownMenuItem<BankModel>>((BankModel value) {
+          return DropdownMenuItem<BankModel>(
+            value: value,
+            child: Text(value.bankCod + ' - ' + value.name),
+          );
+        }).toList();
+      });
+    }
+  }
+
   void _updateWidget() {
     widget.bank.bankCod = _bank.bankCod;
     widget.bank.bank = _bank.bank;
     widget.bank.agency = _bank.agency;
     widget.bank.account = _bank.account;
+    widget.bank.savingAccount = _bank.savingAccount;
     widget.bank.pix = _bank.pix;
   }
 }

@@ -7,6 +7,7 @@ import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
+import 'package:agitprint/components/validators_utils.dart';
 import 'package:agitprint/constants.dart';
 import 'package:agitprint/models/bank_accounts.dart';
 import 'package:agitprint/models/providers.dart';
@@ -324,8 +325,8 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
           'conta': element.account,
           'contapoupanca': element.savingAccount,
           'pix': {
-            'cpf': element.pix['cpf'],
-            'cnpj': element.pix['cnpj'],
+            'cpf': ValidatorUtils.removeCaracteres(element.pix['cpf']),
+            'cnpj': ValidatorUtils.removeCaracteres(element.pix['cnpj']),
             'telefone': element.pix['telefone'],
             'email': element.pix['email'],
           },
@@ -335,8 +336,8 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
       contactDB
           .set({
             'nome': _providersModel.name,
-            'cpf': _providersModel.cpf,
-            'cnpj': _providersModel.cnpj,
+            'cpf': ValidatorUtils.removeCaracteres(_providersModel.cpf),
+            'cnpj': ValidatorUtils.removeCaracteres(_providersModel.cnpj),
             'diretoria': _providersModel.directorship,
             'categorias': _providersModel.categories,
             'contas': _bankAccounts,
