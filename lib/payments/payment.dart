@@ -7,8 +7,14 @@ import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/components/validators_utils.dart';
+import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/providers.dart';
+import 'package:agitprint/models/status.dart';
+import 'package:brasil_fields/brasil_fields.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../constants.dart';
 
@@ -46,10 +52,14 @@ class _PaymentBodyState extends State<PaymentBody> {
   ProvidersModel _dropdownProvider;
   List<DropdownMenuItem<ProvidersModel>> _itemsDropDown = [];
   String _dropdownType;
+  PaymentsModel _paymentModel;
 
   initState() {
     super.initState();
     _getProviders();
+    _paymentModel = PaymentsModel.empty();
+    _paymentModel.idPeople =
+        FirebaseFirestore.instance.doc('/pessoas/SXeqcWVuTpMbQspsgGFG');
   }
 
   void _getProviders() async {
@@ -113,7 +123,7 @@ class _PaymentBodyState extends State<PaymentBody> {
           decoration: BoxDecoration(
               border: Border.all(color: AppColors.grey),
               borderRadius: BorderRadius.all(Radius.circular(12))),
-          child: DropdownButton<ProvidersModel>(
+          child: DropdownButtonFormField<ProvidersModel>(
             isExpanded: true,
             itemHeight: 70,
             hint: Text('Fornecedores'),
@@ -121,10 +131,14 @@ class _PaymentBodyState extends State<PaymentBody> {
             icon: Icon(Icons.arrow_downward),
             iconSize: 24,
             onChanged: (ProvidersModel newValue) {
+              _paymentModel.idProvider = FirebaseFirestore.instance
+                  .collection('fornecedores')
+                  .doc(newValue.id);
               setState(() {
                 _dropdownProvider = newValue;
               });
             },
+            validator: (value) => value == null ? 'Campo obrigatório' : null,
             items: _itemsDropDown,
             style: GoogleTextStyles.customTextStyle(),
           ),
@@ -153,17 +167,19 @@ class _PaymentBodyState extends State<PaymentBody> {
           decoration: BoxDecoration(
               border: Border.all(color: AppColors.grey),
               borderRadius: BorderRadius.all(Radius.circular(12))),
-          child: DropdownButton<String>(
+          child: DropdownButtonFormField<String>(
             isExpanded: true,
             hint: Text('Tipo da solicitação'),
             value: _dropdownType,
             icon: Icon(Icons.arrow_downward),
             iconSize: 24,
             onChanged: (String newValue) {
+              _paymentModel.type = newValue;
               setState(() {
                 _dropdownType = newValue;
               });
             },
+            validator: (value) => value == null ? 'Campo obrigatório' : null,
             items: paymentType.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
@@ -177,41 +193,65 @@ class _PaymentBodyState extends State<PaymentBody> {
           height: defaultPadding,
         ),
         CustomTextFormField(
-          textInputType: TextInputType.text,
-          textCapitalization: TextCapitalization.words,
-          labelText: "Filial",
-          initialValue: '',
-          border: Borders.customOutlineInputBorder(),
-          enabledBorder: Borders.customOutlineInputBorder(),
-          focusedBorder: Borders.customOutlineInputBorder(
-            color: const Color(0xFF655796),
-          ),
-          labelStyle: GoogleTextStyles.customTextStyle(),
-          hintTextStyle: GoogleTextStyles.customTextStyle(),
-          textStyle: GoogleTextStyles.customTextStyle(),
-          onChanged: (value) {
-            //_providersModel.name = value.trim();
-          },
-          validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
-        ),
+            textInputType: TextInputType.text,
+            textCapitalization: TextCapitalization.words,
+            labelText: "Filial",
+            initialValue: '',
+            border: Borders.customOutlineInputBorder(),
+            enabledBorder: Borders.customOutlineInputBorder(),
+            focusedBorder: Borders.customOutlineInputBorder(
+              color: const Color(0xFF655796),
+            ),
+            labelStyle: GoogleTextStyles.customTextStyle(),
+            hintTextStyle: GoogleTextStyles.customTextStyle(),
+            textStyle: GoogleTextStyles.customTextStyle(),
+            onChanged: (value) {
+              _paymentModel.filial = value.trim();
+            }),
         SizedBox(
           height: defaultPadding,
         ),
         CustomTextFormField(
-          textInputType: TextInputType.text,
-          textCapitalization: TextCapitalization.words,
-          labelText: "Descrição",
+            textInputType: TextInputType.multiline,
+            textCapitalization: TextCapitalization.sentences,
+            maxLines: 3,
+            labelText: "Descrição",
+            initialValue: '',
+            border: Borders.customOutlineInputBorder(),
+            enabledBorder: Borders.customOutlineInputBorder(),
+            focusedBorder: Borders.customOutlineInputBorder(
+              color: const Color(0xFF655796),
+            ),
+            labelStyle: GoogleTextStyles.customTextStyle(),
+            hintTextStyle: GoogleTextStyles.customTextStyle(),
+            textStyle: GoogleTextStyles.customTextStyle(),
+            onChanged: (value) {
+              _paymentModel.description = value.trim();
+            }),
+        SizedBox(
+          height: defaultPadding,
+        ),
+        CustomTextFormField(
+          textInputType: TextInputType.number,
+          textCapitalization: TextCapitalization.none,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            RealInputFormatter(centavos: true),
+          ],
+          labelText: "R\$",
           initialValue: '',
-          border: Borders.customOutlineInputBorder(),
-          enabledBorder: Borders.customOutlineInputBorder(),
+          hintText: '0,00',
+          border: Borders.customOutlineInputBorder(width: 2),
+          enabledBorder: Borders.customOutlineInputBorder(width: 2),
           focusedBorder: Borders.customOutlineInputBorder(
             color: const Color(0xFF655796),
           ),
-          labelStyle: GoogleTextStyles.customTextStyle(),
-          hintTextStyle: GoogleTextStyles.customTextStyle(),
-          textStyle: GoogleTextStyles.customTextStyle(),
+          labelStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
+          hintTextStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
+          textStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
           onChanged: (value) {
-            //_providersModel.name = value.trim();
+            _paymentModel.amount =
+                UtilBrasilFields.converterMoedaParaDouble(value);
           },
           validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
         ),
@@ -236,7 +276,7 @@ class _PaymentBodyState extends State<PaymentBody> {
             color: AppColors.blue,
             height: 40,
             onPressed: () {
-              saveContact();
+              requestPayment();
             },
           ),
         ),
@@ -247,29 +287,43 @@ class _PaymentBodyState extends State<PaymentBody> {
     );
   }
 
-  void saveContact() async {
+  void requestPayment() async {
     if (_form.currentState.validate()) {
       setState(() {
         _progressBarActive = true;
       });
 
-      //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
-      //DocumentReference contactDB = FirebaseFirestore.instance
-      //  .collection('categorias')
-      //.doc(_categoriesModel.id);
+      DocumentReference contactDB = FirebaseFirestore.instance
+          .collection('pagamentos')
+          .doc(_paymentModel.id);
 
-      /* contactDB
+      if (_paymentModel.createdAt == null)
+        _paymentModel.createdAt = DateTime.now();
+
+      if (_paymentModel.actionDate == null)
+        _paymentModel.actionDate = DateTime.now();
+
+      //Solicitação inicia sempre como pendente
+      _paymentModel.status = Status.active;
+
+      contactDB
           .set({
-            'nome': _categoriesModel.name,
-            'descricao': _categoriesModel.description,
+            'valor': _paymentModel.amount,
+            'fornecedor': _paymentModel.idProvider,
+            'pessoa': _paymentModel.idPeople,
+            'descricao': _paymentModel.description,
+            'tipo': _paymentModel.type,
+            'filial': _paymentModel.filial,
+            'comprovante': _paymentModel.imageReceipt,
+            'datasolicitacao': _paymentModel.createdAt,
+            'dataacao': _paymentModel.actionDate,
+            'status': _paymentModel.status,
           })
           .then((value) => showDialog(
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: _categoriesModel.id == null
-                        ? Text('Categoria adicionada com sucesso.')
-                        : Text('Categoria atualizada com sucesso.'),
+                    title: Text('Pagamento solicitado com sucesso.'),
                     actions: <Widget>[
                       TextButton(
                         child: Text('Ok'),
@@ -283,15 +337,12 @@ class _PaymentBodyState extends State<PaymentBody> {
               ))
           .then((value) => setState(() {
                 _progressBarActive = false;
-                _categoriesModel.id = contactDB.id;
               }))
           .catchError((error) => showDialog(
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: _categoriesModel.id == null
-                        ? Text('Falha ao adicionar Categoria.')
-                        : Text('Falha ao atualizar Categoria.'),
+                    title: Text('Falha ao solicitar Pagamento.'),
                     content: Text('Erro: ' + error),
                     actions: <Widget>[
                       TextButton(
@@ -307,7 +358,6 @@ class _PaymentBodyState extends State<PaymentBody> {
           .then((value) => setState(() {
                 _progressBarActive = false;
               }));
-    } */
     }
   }
 }

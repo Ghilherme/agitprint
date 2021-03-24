@@ -3,7 +3,7 @@ import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../accounts.dart';
+import '../extract/accounts.dart';
 import '../constants.dart';
 
 class BodyHome extends StatelessWidget {

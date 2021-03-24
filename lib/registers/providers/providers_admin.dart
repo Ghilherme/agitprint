@@ -200,13 +200,15 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
           decoration: BoxDecoration(
               border: Border.all(color: AppColors.grey),
               borderRadius: BorderRadius.all(Radius.circular(12))),
-          child: DropdownButton<String>(
+          child: DropdownButtonFormField<String>(
             isExpanded: true,
             hint: Text('Diretoria'),
             value: _dropdownDirectorship,
             icon: Icon(Icons.arrow_downward),
             iconSize: 24,
             elevation: 16,
+            validator: (value) =>
+                value == null || value.isEmpty ? 'Campo obrigatório' : null,
             onChanged: (String newValue) {
               _providersModel.directorship = newValue;
               setState(() {
