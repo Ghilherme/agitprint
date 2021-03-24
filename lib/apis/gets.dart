@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:agitprint/models/banks.dart';
+import 'package:agitprint/models/providers.dart';
+import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 class Gets {
   static Future<List<String>> getDirectorships() async {
-    //Pega a tabela categorias somente da categoria selecionada
     List<String> directorships = [];
     await FirebaseFirestore.instance
         .collection('diretorias')
@@ -18,6 +19,37 @@ class Gets {
       });
     });
     return directorships;
+  }
+
+  static Future<List<String>> getCategories() async {
+    List<String> categories = [];
+    await FirebaseFirestore.instance
+        .collection('categorias')
+        .orderBy('nome')
+        .get()
+        .then((value) {
+      value.docs.forEach((element) {
+        return categories.add(element.data()['nome']);
+      });
+    });
+    return categories;
+  }
+
+  static Future<List<ProvidersModel>> getProviders() async {
+    List<ProvidersModel> providers = [];
+    await getProvidersQuery().get().then((value) {
+      value.docs.forEach((element) {
+        return providers.add(ProvidersModel.fromFirestore(element));
+      });
+    });
+    return providers;
+  }
+
+  static Query getProvidersQuery() {
+    return FirebaseFirestore.instance
+        .collection('fornecedores')
+        .orderBy('nome')
+        .where('status', isEqualTo: Status.active);
   }
 
   static Future<List<BankModel>> readBankJson() async {

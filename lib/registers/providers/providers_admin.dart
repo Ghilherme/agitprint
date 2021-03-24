@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/bank_card.dart';
+import 'package:agitprint/components/bank_card_blank.dart';
 import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
@@ -65,14 +66,39 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
 
   initState() {
     super.initState();
-    getDirectorships();
-    getCategories();
+    _getDirectorships();
+    _getCategories();
     _providersModel = ProvidersModel.fromProviders(providers);
     if (_providersModel.directorship.isNotEmpty) {
       _dropdownDirectorship = _providersModel.directorship;
     }
     if (_providersModel.lastModification == null)
       _providersModel.lastModification = DateTime.now();
+  }
+
+  void _getDirectorships() async {
+    List<String> directorships = await Gets.getDirectorships();
+    if (this.mounted) {
+      setState(() {
+        _itemsDropDown = directorships
+            .map((dir) => DropdownMenuItem<String>(
+                  child: Text(dir),
+                  value: dir,
+                ))
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _getCategories() async {
+    List<String> categories = await Gets.getCategories();
+    if (this.mounted) {
+      setState(() {
+        _itemsMultiSelect = categories
+            .map((cate) => MultiSelectItem<String>(cate, cate))
+            .toList();
+      });
+    }
   }
 
   @override
@@ -230,35 +256,7 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        Material(
-            elevation: 1,
-            shadowColor: Colors.grey.shade300,
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Stack(children: [
-              Container(
-                  width: MediaQuery.of(context).size.width - 40,
-                  height: 170,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Center(
-                        child: IconButton(
-                          icon: Icon(Icons.add),
-                          iconSize: 40,
-                          onPressed: () {
-                            setState(() {
-                              _providersModel.banks
-                                  .add(new BankAccountModel.empty());
-                            });
-                          },
-                        ),
-                      )
-                    ],
-                  )),
-            ])),
+        BankCardBlank(callback: callbackBankCardBlank),
         SizedBox(
           height: defaultPadding,
         ),
@@ -288,11 +286,29 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
     );
   }
 
+  List<Widget> _buildCards(List<BankAccountModel> banks) {
+    List<Widget> list = [];
+    banks.forEach((element) {
+      list.add(new BankCard(
+          isEditable: true, bank: element, callback: callbackBankCard));
+      list.add(new SizedBox(
+        height: defaultPadding,
+      ));
+    });
+    return list;
+  }
+
   callbackBankCard(bank) {
     setState(() {
       _providersModel.banks.remove(bank);
       if (_providersModel.banks.length == 0)
         _providersModel.banks.add(BankAccountModel.empty());
+    });
+  }
+
+  callbackBankCardBlank() {
+    setState(() {
+      _providersModel.banks.add(new BankAccountModel.empty());
     });
   }
 
@@ -390,51 +406,5 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
                 _progressBarActive = false;
               }));
     }
-  }
-
-  void getDirectorships() async {
-    List<String> directorships = await Gets.getDirectorships();
-    if (this.mounted) {
-      setState(() {
-        _itemsDropDown = directorships
-            .map((dir) => DropdownMenuItem<String>(
-                  child: Text(dir),
-                  value: dir,
-                ))
-            .toList();
-      });
-    }
-  }
-
-  Future<void> getCategories() async {
-    List<String> categories = [];
-    await FirebaseFirestore.instance
-        .collection('categorias')
-        .orderBy('nome')
-        .get()
-        .then((value) {
-      value.docs.forEach((element) {
-        return categories.add(element.data()['nome']);
-      });
-    });
-    if (this.mounted) {
-      setState(() {
-        _itemsMultiSelect = categories
-            .map((cate) => MultiSelectItem<String>(cate, cate))
-            .toList();
-      });
-    }
-  }
-
-  List<Widget> _buildCards(List<BankAccountModel> banks) {
-    List<Widget> list = [];
-    banks.forEach((element) {
-      list.add(new BankCard(
-          isEditable: true, bank: element, callback: callbackBankCard));
-      list.add(new SizedBox(
-        height: defaultPadding,
-      ));
-    });
-    return list;
   }
 }

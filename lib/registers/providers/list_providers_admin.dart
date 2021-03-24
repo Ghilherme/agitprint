@@ -1,3 +1,4 @@
+import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/confirmation_dialog.dart';
 import 'package:agitprint/components/list_tile_admin.dart';
 import 'package:agitprint/components/list_view_header.dart';
@@ -15,10 +16,7 @@ class ListProvidersAdmin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Query query = FirebaseFirestore.instance
-        .collection('fornecedores')
-        .orderBy('nome')
-        .where('status', isEqualTo: Status.active);
+    Query query = Gets.getProvidersQuery();
 
     return Scaffold(
         appBar: AppBar(

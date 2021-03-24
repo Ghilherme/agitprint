@@ -52,7 +52,7 @@ class ProvidersModel {
     this.cpf = '';
     this.cnpj = '';
     this.directorship = '';
-    this.categories = [''];
+    this.categories = [];
     this.banks = [BankAccountModel.empty()];
     this.lastModification = null;
     this.createdAt = null;

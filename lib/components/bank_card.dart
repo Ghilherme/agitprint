@@ -14,7 +14,8 @@ import 'colors.dart';
 import 'custom_text_form_field.dart';
 
 class BankCard extends StatefulWidget {
-  BankCard({Key key, this.bank, this.isEditable = false, this.callback})
+  BankCard(
+      {Key key, @required this.bank, this.isEditable = false, this.callback})
       : super(key: key);
   BankAccountModel bank;
   bool isEditable;
@@ -57,7 +58,7 @@ class _BankCardState extends State<BankCard> {
           widget.isEditable
               ? Positioned(
                   top: 50,
-                  right: 5,
+                  right: -5,
                   child: Container(
                     padding: EdgeInsets.all(0),
                     child: IconButton(
@@ -73,7 +74,7 @@ class _BankCardState extends State<BankCard> {
           widget.isEditable
               ? Positioned(
                   bottom: 20,
-                  right: 5,
+                  right: -5,
                   child: Container(
                     padding: EdgeInsets.all(0),
                     child: IconButton(
@@ -123,7 +124,7 @@ class _BankCardState extends State<BankCard> {
           ),
           Container(
             width: _media.width - 40,
-            padding: EdgeInsets.all(30),
+            padding: EdgeInsets.only(right: 30, top: 30, left: 30, bottom: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -134,6 +135,7 @@ class _BankCardState extends State<BankCard> {
                   _bank.bank == '' ? 'Banco' : _bank.bank,
                   style: Theme.of(context).textTheme.headline6.copyWith(
                       color: Colors.black, fontWeight: FontWeight.bold),
+                  maxLines: 1,
                 ),
                 SizedBox(
                   height: 10,
@@ -212,12 +214,15 @@ class _BankCardState extends State<BankCard> {
                           children: [
                             _bank.pix['email'] == ""
                                 ? Container()
-                                : Text('Email: ' + _bank.pix['email'],
+                                : Text(
+                                    'Email: ' + _bank.pix['email'],
+                                    overflow: TextOverflow.fade,
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.grey.shade400,
                                       fontWeight: FontWeight.bold,
-                                    )),
+                                    ),
+                                  ),
                           ],
                         )
                       ],
@@ -232,19 +237,45 @@ class _BankCardState extends State<BankCard> {
             right: 15,
             child: Container(
               height: 23,
-              width: 47,
-              color: Color(0xFF015FFF),
-              padding: EdgeInsets.all(7),
-              child: Image.network(
-                'https://resources.mynewsdesk.com/image/upload/ojf8ed4taaxccncp6pcp.png',
-                width: 50,
-                color: Colors.white,
-              ),
+              width: 50,
+              child: _getBankLogo(_bank.bankCod),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Image _getBankLogo(String bankCod) {
+    String bankAsset = '';
+    switch (bankCod) {
+      case '001':
+        bankAsset = 'assets/images/bb_logo.jpg';
+        break;
+      case '033':
+        bankAsset = 'assets/images/santander_logo.png';
+        break;
+      case '104':
+        bankAsset = 'assets/images/caixa_logo.jpg';
+        break;
+      case '237':
+        bankAsset = 'assets/images/bradesco_logo.png';
+        break;
+      case '029':
+      case '341':
+        bankAsset = 'assets/images/itau_logo.jpg';
+        break;
+
+      default:
+        bankAsset = 'assets/images/bank_logo.jpg';
+    }
+
+    return Image(
+        image: Image.asset(
+      bankAsset,
+      width: 50,
+      color: Colors.white,
+    ).image);
   }
 
   buildDialog(BuildContext context) {
@@ -269,6 +300,7 @@ class _BankCardState extends State<BankCard> {
                         isExpanded: true,
                         hint: Text('Bancos'),
                         value: _dropdownBanks,
+                        itemHeight: 70,
                         icon: Icon(Icons.arrow_downward),
                         iconSize: 24,
                         elevation: 16,
@@ -408,6 +440,10 @@ class _BankCardState extends State<BankCard> {
                       hintTextStyle: GoogleTextStyles.customTextStyle(),
                       textStyle: GoogleTextStyles.customTextStyle(),
                       onChanged: (value) {
+                        if (value.isEmpty) {
+                          _bank.pix['cpf'] = '';
+                          _bank.pix['cnpj'] = '';
+                        }
                         if (CPF.isValid(value)) {
                           _bank.pix['cpf'] = value.trim();
                           _bank.pix['cnpj'] = '';

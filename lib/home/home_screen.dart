@@ -1,3 +1,4 @@
+import 'package:agitprint/payments/payment.dart';
 import 'package:flutter/material.dart';
 import '../app_drawer.dart';
 import '../constants.dart';
@@ -23,6 +24,13 @@ class _HomeScreenState extends State<HomeScreen> {
             title: Text(mainTitleApp),
           ),
           body: BodyHome(),
+          floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.attach_money),
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => Payment()));
+            },
+          ),
         ));
   }
 }

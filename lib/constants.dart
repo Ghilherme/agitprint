@@ -14,3 +14,7 @@ List<MultiSelectItem> profiles = [
   const MultiSelectItem('admin', 'admin'),
   const MultiSelectItem('admin2', 'admin2')
 ];
+const List<String> paymentType = const [
+  'Compras',
+  'Ação',
+];
