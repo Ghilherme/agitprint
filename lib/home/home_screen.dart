@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
         home: Scaffold(
           drawer: CustomDrawer(),
           appBar: AppBar(
+            centerTitle: true,
             title: Text(mainTitleApp),
           ),
           body: BodyHome(),

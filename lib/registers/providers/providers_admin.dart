@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/bank_card.dart';
 import 'package:agitprint/components/bank_card_blank.dart';

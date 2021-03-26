@@ -52,6 +52,13 @@ class Gets {
         .where('status', isEqualTo: Status.active);
   }
 
+  static Query getPaymentsQuery(DocumentReference idPeople) {
+    return FirebaseFirestore.instance
+        .collection('pagamentos')
+        .where('pessoa', isEqualTo: idPeople)
+        .orderBy('datasolicitacao');
+  }
+
   static Future<List<BankModel>> readBankJson() async {
     List<BankModel> banks = [];
     final String response =

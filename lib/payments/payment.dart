@@ -12,10 +12,8 @@ import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import '../constants.dart';
 
 class Payment extends StatelessWidget {
@@ -26,6 +24,7 @@ class Payment extends StatelessWidget {
       appBar: AppBar(
           title: Text('Solicitar Pagamento'),
           elevation: 0,
+          centerTitle: true,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -114,7 +113,6 @@ class _PaymentBodyState extends State<PaymentBody> {
     ThemeData theme = Theme.of(context);
     return Column(
       children: <Widget>[
-        Container(height: 30),
         SizedBox(
           height: defaultPadding,
         ),
@@ -212,9 +210,8 @@ class _PaymentBodyState extends State<PaymentBody> {
           height: defaultPadding,
         ),
         CustomTextFormField(
-            textInputType: TextInputType.multiline,
+            textInputType: TextInputType.text,
             textCapitalization: TextCapitalization.sentences,
-            maxLines: 3,
             labelText: "Descrição",
             initialValue: '',
             border: Borders.customOutlineInputBorder(),
@@ -293,10 +290,6 @@ class _PaymentBodyState extends State<PaymentBody> {
         _progressBarActive = true;
       });
 
-      DocumentReference contactDB = FirebaseFirestore.instance
-          .collection('pagamentos')
-          .doc(_paymentModel.id);
-
       if (_paymentModel.createdAt == null)
         _paymentModel.createdAt = DateTime.now();
 
@@ -306,18 +299,40 @@ class _PaymentBodyState extends State<PaymentBody> {
       //Solicitação inicia sempre como pendente
       _paymentModel.status = Status.active;
 
-      contactDB
-          .set({
-            'valor': _paymentModel.amount,
-            'fornecedor': _paymentModel.idProvider,
-            'pessoa': _paymentModel.idPeople,
-            'descricao': _paymentModel.description,
-            'tipo': _paymentModel.type,
-            'filial': _paymentModel.filial,
-            'comprovante': _paymentModel.imageReceipt,
-            'datasolicitacao': _paymentModel.createdAt,
-            'dataacao': _paymentModel.actionDate,
-            'status': _paymentModel.status,
+      FirebaseFirestore.instance
+          .runTransaction((transaction) async {
+            //Referencia pagamento
+            DocumentReference payment = FirebaseFirestore.instance
+                .collection('pagamentos')
+                .doc(_paymentModel.id);
+
+            //Insere pagamento
+            transaction.set(payment, {
+              'valor': _paymentModel.amount,
+              'fornecedor': _paymentModel.idProvider,
+              'pessoa': _paymentModel.idPeople,
+              'descricao': _paymentModel.description,
+              'tipo': _paymentModel.type,
+              'filial': _paymentModel.filial,
+              'comprovante': _paymentModel.imageReceipt,
+              'datasolicitacao': _paymentModel.createdAt,
+              'dataacao': _paymentModel.actionDate,
+              'status': _paymentModel.status,
+            });
+
+            //Referencia coleção pessoas
+            DocumentReference ref = FirebaseFirestore.instance
+                .collection('pessoas')
+                .doc(_paymentModel.idPeople.id);
+
+            //Get data coleção pessoas
+            DocumentSnapshot people = await ref.get();
+
+            //atualiza saldo da pessoa e pagamentos pendentes
+            num balance = people.data()['saldo'] - _paymentModel.amount;
+            num pendingPayment = people.data()['pagamentospendentes'] + 1;
+            transaction.update(
+                ref, {'saldo': balance, 'pagamentospendentes': pendingPayment});
           })
           .then((value) => showDialog(
                 context: context,

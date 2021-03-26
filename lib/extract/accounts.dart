@@ -1,6 +1,9 @@
+import 'package:agitprint/apis/gets.dart';
+import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/people.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../constants.dart';
@@ -18,10 +21,46 @@ class _AccountState extends State<Account> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomSheet: Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
+              gradient: RadialGradient(
+                  colors: [Color(0xFF015FFF), Color(0xFF015FFF)])),
+          padding: EdgeInsets.all(5.0),
+          // color: Color(0xFF015FFF),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child: Text('Saldo: ',
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 24.0)),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child: Text(r"R$ " + widget.people.balance.toString(),
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 24.0)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          )),
       appBar: AppBar(
-          iconTheme: IconThemeData(
-            color: Colors.blue, //change your color here
-          ),
           backgroundColor: Colors.white,
           elevation: 0.0,
           title: Text(
@@ -30,6 +69,7 @@ class _AccountState extends State<Account> {
           ),
           centerTitle: true,
           leading: IconButton(
+            color: Theme.of(context).primaryColor,
             icon: Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.of(context).pop();
@@ -129,14 +169,41 @@ class _AccountBodyState extends State<AccountBody> {
                             : Image.network(widget.people.imageAvatar).image),
                   ),
                 ])),
-            Container(
-              margin: EdgeInsets.all(15.0),
-              child: Column(
-                children: _buildExtract([]),
-              ),
-            ),
-            _displayPaymentList(),
-            _balance(),
+            StreamBuilder<QuerySnapshot>(
+              stream: Gets.getPaymentsQuery(FirebaseFirestore.instance
+                      .collection('pessoas')
+                      .doc(widget.people.id))
+                  .snapshots(),
+              builder: (context, snapshot) {
+                //Trata Load
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                //Trata Erro
+                if (snapshot.hasError) {
+                  return Center(child: Text(snapshot.error.toString()));
+                }
+
+                List<PaymentsModel> pays = snapshot.data.docs
+                    .map((e) => PaymentsModel.fromFirestore(e))
+                    .toList();
+
+                return Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(15.0),
+                      child: Column(
+                        children: _buildExtract(pays),
+                      ),
+                    ),
+                    SizedBox(
+                      height: defaultPadding,
+                    ),
+                  ],
+                );
+              },
+            )
           ],
         ),
       ),
@@ -145,40 +212,23 @@ class _AccountBodyState extends State<AccountBody> {
 
   List<Widget> _buildExtract(List<PaymentsModel> payments) {
     List<Widget> list = [];
-    payments.forEach((element) {
+
+    for (int i = 0; i < payments.length; i++) {
       list.add(_paymentItems(
-          "Trevello App", r"+ $ 4,946.00", "28-04-16", "credit",
-          oddColour: const Color(0xFFF7F7F9)));
-      list.add(new SizedBox(
-        height: defaultPadding,
-      ));
-    });
+          payments[i].description.isEmpty
+              ? 'Pagamento'
+              : payments[i].description,
+          r"R$ " + payments[i].amount.toString(),
+          "${payments[i].createdAt.day.toString().padLeft(2, '0')}-${payments[i].createdAt.month.toString().padLeft(2, '0')}-${payments[i].createdAt.year.toString()} ${payments[i].createdAt.hour.toString().padLeft(2, '0')}:${payments[i].createdAt.minute.toString().padLeft(2, '0')}",
+          payments[i].filial + ' - ' + payments[i].type,
+          oddColour: i.isEven ? Colors.white : const Color(0xFFF7F7F9)));
+    }
+
     return list;
   }
 
-  _displayPaymentList() {
-    return Container(
-      margin: EdgeInsets.all(15.0),
-      child: Column(
-        children: <Widget>[
-          _paymentItems("Trevello App", r"+ $ 4,946.00", "28-04-16", "credit",
-              oddColour: const Color(0xFFF7F7F9)),
-          _paymentItems(
-              "Creative Studios", r"+ $ 5,428.00", "26-04-16", "credit"),
-          _paymentItems("Amazon EU", r"+ $ 746.00", "25-04-216", "Payment",
-              oddColour: const Color(0xFFF7F7F9)),
-          _paymentItems(
-              "Creative Studios", r"+ $ 14,526.00", "16-04-16", "Payment"),
-          _paymentItems(
-              "Book Hub Society", r"+ $ 2,876.00", "04-04-16", "Credit",
-              oddColour: const Color(0xFFF7F7F9)),
-        ],
-      ),
-    );
-  }
-
   Container _paymentItems(
-          String item, String charge, String dateString, String type,
+          String item, String amount, String actionDate, String type,
           {Color oddColour = Colors.white}) =>
       Container(
         decoration: BoxDecoration(color: oddColour),
@@ -189,8 +239,19 @@ class _AccountBodyState extends State<AccountBody> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(item, style: TextStyle(fontSize: 16.0)),
-                Text(charge, style: TextStyle(fontSize: 16.0))
+                Expanded(
+                  child: Text(item,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleTextStyles.customTextStyle(
+                          fontSize: 16,
+                          color: AppColors.black,
+                          fontWeight: FontWeight.w400)),
+                ),
+                Text(amount,
+                    style: GoogleTextStyles.customTextStyle(
+                        fontSize: 16,
+                        color: const Color(0xff85bb65),
+                        fontWeight: FontWeight.w400))
               ],
             ),
             SizedBox(
@@ -199,38 +260,47 @@ class _AccountBodyState extends State<AccountBody> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(dateString,
-                    style: TextStyle(color: Colors.grey, fontSize: 14.0)),
-                Text(type, style: TextStyle(color: Colors.grey, fontSize: 14.0))
+                Text(actionDate,
+                    style: GoogleTextStyles.customTextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w300)),
+                Text(type,
+                    style: GoogleTextStyles.customTextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w300))
               ],
             ),
           ],
         ),
       );
 
-  Card _balance() => Card(
-        margin: EdgeInsets.all(10.0),
-        elevation: 1.0,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50.0))),
-        child: Container(
-            height: 70,
-            decoration: BoxDecoration(
-                gradient: RadialGradient(
-                    colors: [Color(0xFF015FFF), Color(0xFF015FFF)])),
-            padding: EdgeInsets.all(5.0),
-            // color: Color(0xFF015FFF),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(5.0),
-                    child: Text(r"R$ " + widget.people.balance.toString(),
-                        style: TextStyle(color: Colors.white, fontSize: 30.0)),
-                  ),
+  Widget _balance() {
+    return Card(
+      margin: EdgeInsets.all(10.0),
+      elevation: 1.0,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(50.0))),
+      child: Container(
+          height: 70,
+          decoration: BoxDecoration(
+              gradient: RadialGradient(
+                  colors: [Color(0xFF015FFF), Color(0xFF015FFF)])),
+          padding: EdgeInsets.all(5.0),
+          // color: Color(0xFF015FFF),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Text(r"R$ " + widget.people.balance.toString(),
+                      style: TextStyle(color: Colors.white, fontSize: 30.0)),
                 ),
-              ],
-            )),
-      );
+              ),
+            ],
+          )),
+    );
+  }
 }
