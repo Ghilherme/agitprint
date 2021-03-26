@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 
@@ -18,3 +19,6 @@ const List<String> paymentType = const [
   'Compras',
   'Ação',
 ];
+
+DocumentReference fazerLogar =
+    FirebaseFirestore.instance.doc('/pessoas/SXeqcWVuTpMbQspsgGFG');

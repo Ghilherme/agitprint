@@ -1,10 +1,16 @@
 import 'package:agitprint/apis/gets.dart';
+import 'package:agitprint/apis/sets.dart';
+import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/colors.dart';
+import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/people.dart';
+import 'package:agitprint/models/status.dart';
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../constants.dart';
 
@@ -18,48 +24,12 @@ class Account extends StatefulWidget {
 }
 
 class _AccountState extends State<Account> {
+  bool _progressBarActive = false;
+  final _form = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomSheet: Container(
-          width: double.infinity,
-          height: 50,
-          decoration: BoxDecoration(
-              gradient: RadialGradient(
-                  colors: [Color(0xFF015FFF), Color(0xFF015FFF)])),
-          padding: EdgeInsets.all(5.0),
-          // color: Color(0xFF015FFF),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(5.0),
-                      child: Text('Saldo: ',
-                          style:
-                              TextStyle(color: Colors.white, fontSize: 24.0)),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(5.0),
-                      child: Text(r"R$ " + widget.people.balance.toString(),
-                          style:
-                              TextStyle(color: Colors.white, fontSize: 24.0)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          )),
+      bottomSheet: _buildBalance(),
       appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0.0,
@@ -76,6 +46,188 @@ class _AccountState extends State<Account> {
             },
           )),
       body: AccountBody(widget.people),
+    );
+  }
+
+  buildDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        PaymentsModel _paymentModel = PaymentsModel.empty();
+        return Form(
+          key: _form,
+          child: SimpleDialog(
+            title: Text('Acrescentar saldo:'),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(defaultPadding),
+                child: Column(
+                  children: [
+                    CustomTextFormField(
+                        textInputType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
+                        labelText: "Descrição",
+                        initialValue: '',
+                        border: Borders.customOutlineInputBorder(),
+                        enabledBorder: Borders.customOutlineInputBorder(),
+                        focusedBorder: Borders.customOutlineInputBorder(
+                          color: const Color(0xFF655796),
+                        ),
+                        labelStyle: GoogleTextStyles.customTextStyle(),
+                        hintTextStyle: GoogleTextStyles.customTextStyle(),
+                        textStyle: GoogleTextStyles.customTextStyle(),
+                        onChanged: (value) {
+                          _paymentModel.description = value;
+                        }),
+                    SizedBox(
+                      height: defaultPadding,
+                    ),
+                    CustomTextFormField(
+                        textInputType: TextInputType.number,
+                        textCapitalization: TextCapitalization.none,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        labelText: r"R$",
+                        initialValue: '',
+                        border: Borders.customOutlineInputBorder(),
+                        enabledBorder: Borders.customOutlineInputBorder(),
+                        focusedBorder: Borders.customOutlineInputBorder(
+                          color: const Color(0xFF655796),
+                        ),
+                        labelStyle: GoogleTextStyles.customTextStyle(),
+                        hintTextStyle: GoogleTextStyles.customTextStyle(),
+                        textStyle: GoogleTextStyles.customTextStyle(),
+                        onChanged: (value) {
+                          _paymentModel.amount =
+                              UtilBrasilFields.converterMoedaParaDouble(value);
+                        }),
+                    SizedBox(
+                      height: defaultPadding,
+                    ),
+                  ],
+                ),
+              ),
+              Center(
+                  child: ElevatedButton(
+                      child: Text('Adicionar'),
+                      onPressed: () {
+                        updateBalance(_paymentModel);
+                        Navigator.of(context).pop();
+                      }))
+            ],
+            contentPadding: const EdgeInsets.all(defaultPadding),
+          ),
+        );
+      },
+    );
+  }
+
+  void updateBalance(PaymentsModel _paymentModel) async {
+    if (_form.currentState.validate()) {
+      setState(() {
+        _progressBarActive = true;
+      });
+
+      if (_paymentModel.createdAt == null)
+        _paymentModel.createdAt = DateTime.now();
+
+      if (_paymentModel.actionDate == null)
+        _paymentModel.actionDate = DateTime.now();
+
+      //Solicitação inicia sempre como ativa
+      _paymentModel.status = Status.active;
+
+      _paymentModel.type =
+          _paymentModel.amount.isNegative ? 'Débito' : 'Crédito';
+
+      //referencia id da atual pessoa desse extrato
+      _paymentModel.idPeople = FirebaseFirestore.instance
+          .collection('pessoas')
+          .doc(widget.people.id);
+      //referencia admin como fornecedor
+      _paymentModel.idProvider = FirebaseFirestore.instance
+          .collection('fornecedores')
+          .doc(fazerLogar.id);
+
+      Sets.setBalanceTransaction(_paymentModel, false)
+          .then((value) => showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Saldo atualizado com sucesso.'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('Ok'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ))
+          .then((value) => setState(() {
+                _progressBarActive = false;
+                widget.people.balance =
+                    widget.people.balance + _paymentModel.amount;
+              }))
+          .catchError((error) => showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Falha ao atualizar saldo.'),
+                    content: Text('Erro: ' + error),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('Ok'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ))
+          .then((value) => setState(() {
+                _progressBarActive = false;
+              }));
+    }
+  }
+
+  Card _buildBalance() {
+    return Card(
+      margin: EdgeInsets.all(10.0),
+      elevation: 11.0,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(50.0))),
+      child: Container(
+          height: 70,
+          decoration: BoxDecoration(
+              gradient: RadialGradient(
+                  colors: [Color(0xFF015FFF), Color(0xFF015FFF)])),
+          padding: EdgeInsets.all(5.0),
+          // color: Color(0xFF015FFF),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.add_circle_sharp,
+                  size: 30,
+                ),
+                onPressed: () => buildDialog(context),
+                color: Colors.blueGrey[100],
+              ),
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Text(r"R$ " + widget.people.balance.toString(),
+                      style: TextStyle(color: Colors.white, fontSize: 24.0)),
+                ),
+              ),
+            ],
+          )),
     );
   }
 }
@@ -218,7 +370,7 @@ class _AccountBodyState extends State<AccountBody> {
           payments[i].description.isEmpty
               ? 'Pagamento'
               : payments[i].description,
-          r"R$ " + payments[i].amount.toString(),
+          payments[i].amount,
           "${payments[i].createdAt.day.toString().padLeft(2, '0')}-${payments[i].createdAt.month.toString().padLeft(2, '0')}-${payments[i].createdAt.year.toString()} ${payments[i].createdAt.hour.toString().padLeft(2, '0')}:${payments[i].createdAt.minute.toString().padLeft(2, '0')}",
           payments[i].filial + ' - ' + payments[i].type,
           oddColour: i.isEven ? Colors.white : const Color(0xFFF7F7F9)));
@@ -228,7 +380,7 @@ class _AccountBodyState extends State<AccountBody> {
   }
 
   Container _paymentItems(
-          String item, String amount, String actionDate, String type,
+          String item, num amount, String actionDate, String type,
           {Color oddColour = Colors.white}) =>
       Container(
         decoration: BoxDecoration(color: oddColour),
@@ -247,11 +399,17 @@ class _AccountBodyState extends State<AccountBody> {
                           color: AppColors.black,
                           fontWeight: FontWeight.w400)),
                 ),
-                Text(amount,
-                    style: GoogleTextStyles.customTextStyle(
-                        fontSize: 16,
-                        color: const Color(0xff85bb65),
-                        fontWeight: FontWeight.w400))
+                amount.isNegative
+                    ? Text(r"R$ " + amount.toString(),
+                        style: GoogleTextStyles.customTextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w400))
+                    : Text(r"R$ " + amount.toString(),
+                        style: GoogleTextStyles.customTextStyle(
+                            fontSize: 16,
+                            color: const Color(0xff85bb65),
+                            fontWeight: FontWeight.w400))
               ],
             ),
             SizedBox(
@@ -275,32 +433,4 @@ class _AccountBodyState extends State<AccountBody> {
           ],
         ),
       );
-
-  Widget _balance() {
-    return Card(
-      margin: EdgeInsets.all(10.0),
-      elevation: 1.0,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(50.0))),
-      child: Container(
-          height: 70,
-          decoration: BoxDecoration(
-              gradient: RadialGradient(
-                  colors: [Color(0xFF015FFF), Color(0xFF015FFF)])),
-          padding: EdgeInsets.all(5.0),
-          // color: Color(0xFF015FFF),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(5.0),
-                  child: Text(r"R$ " + widget.people.balance.toString(),
-                      style: TextStyle(color: Colors.white, fontSize: 30.0)),
-                ),
-              ),
-            ],
-          )),
-    );
-  }
 }

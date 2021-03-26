@@ -1,4 +1,5 @@
 import 'package:agitprint/apis/gets.dart';
+import 'package:agitprint/apis/sets.dart';
 import 'package:agitprint/components/bank_card.dart';
 import 'package:agitprint/components/bank_card_blank.dart';
 import 'package:agitprint/components/borders.dart';
@@ -57,8 +58,7 @@ class _PaymentBodyState extends State<PaymentBody> {
     super.initState();
     _getProviders();
     _paymentModel = PaymentsModel.empty();
-    _paymentModel.idPeople =
-        FirebaseFirestore.instance.doc('/pessoas/SXeqcWVuTpMbQspsgGFG');
+    _paymentModel.idPeople = fazerLogar;
   }
 
   void _getProviders() async {
@@ -299,41 +299,10 @@ class _PaymentBodyState extends State<PaymentBody> {
       //Solicitação inicia sempre como pendente
       _paymentModel.status = Status.active;
 
-      FirebaseFirestore.instance
-          .runTransaction((transaction) async {
-            //Referencia pagamento
-            DocumentReference payment = FirebaseFirestore.instance
-                .collection('pagamentos')
-                .doc(_paymentModel.id);
+      //sempre debito quando passa por essa tela
+      _paymentModel.amount = -_paymentModel.amount;
 
-            //Insere pagamento
-            transaction.set(payment, {
-              'valor': _paymentModel.amount,
-              'fornecedor': _paymentModel.idProvider,
-              'pessoa': _paymentModel.idPeople,
-              'descricao': _paymentModel.description,
-              'tipo': _paymentModel.type,
-              'filial': _paymentModel.filial,
-              'comprovante': _paymentModel.imageReceipt,
-              'datasolicitacao': _paymentModel.createdAt,
-              'dataacao': _paymentModel.actionDate,
-              'status': _paymentModel.status,
-            });
-
-            //Referencia coleção pessoas
-            DocumentReference ref = FirebaseFirestore.instance
-                .collection('pessoas')
-                .doc(_paymentModel.idPeople.id);
-
-            //Get data coleção pessoas
-            DocumentSnapshot people = await ref.get();
-
-            //atualiza saldo da pessoa e pagamentos pendentes
-            num balance = people.data()['saldo'] - _paymentModel.amount;
-            num pendingPayment = people.data()['pagamentospendentes'] + 1;
-            transaction.update(
-                ref, {'saldo': balance, 'pagamentospendentes': pendingPayment});
-          })
+      Sets.setBalanceTransaction(_paymentModel, true)
           .then((value) => showDialog(
                 context: context,
                 builder: (context) {
