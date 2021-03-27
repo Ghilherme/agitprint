@@ -65,7 +65,7 @@ class BodyHome extends StatelessWidget {
                 ),
                 TextSpan(text: '\n'),
                 TextSpan(
-                  text: "R\$" + people.balance.toString(),
+                  text: "R\$" + people.balance.toStringAsFixed(2),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ],

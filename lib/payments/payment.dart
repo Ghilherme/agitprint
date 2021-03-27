@@ -297,7 +297,7 @@ class _PaymentBodyState extends State<PaymentBody> {
         _paymentModel.actionDate = DateTime.now();
 
       //Solicitação inicia sempre como pendente
-      _paymentModel.status = Status.active;
+      _paymentModel.status = Status.pending;
 
       //sempre debito quando passa por essa tela
       _paymentModel.amount = -_paymentModel.amount;
