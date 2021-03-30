@@ -1,8 +1,8 @@
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/screen_size.dart';
+import 'package:agitprint/constants.dart';
 import 'package:agitprint/extract/transaction_tile.dart';
 import 'package:agitprint/extract/update_balance_dialog.dart';
-import 'package:agitprint/home/body_home.dart';
 import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -97,7 +97,7 @@ class _AccountState extends State<Account> {
                         ],
                       ),
                       SizedBox(
-                        height: 20,
+                        height: defaultPadding,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,6 +129,23 @@ class _AccountState extends State<Account> {
                               },
                             ),
                           ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.remove_sharp,
+                              color: Colors.white,
+                              size: 36,
+                            ),
+                            onPressed: () => showDialog(
+                              context: context,
+                              builder: (context) {
+                                return UpdateBalanceDialog(
+                                  people: widget.people,
+                                  callback: callbackBalance,
+                                  isAdd: false,
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -144,30 +161,18 @@ class _AccountState extends State<Account> {
                         ? _media.height / 4
                         : _media.height / 4.3,
                     width: _media.width,
-                    child:
-                        NotificationListener<OverscrollIndicatorNotification>(
-                      onNotification: (overscroll) {
-                        overscroll.disallowGlow();
+                    child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      padding: EdgeInsets.only(bottom: 10),
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: BalanceCard(people: widget.people),
+                        );
                       },
-                      child: ListView.builder(
-                        physics: BouncingScrollPhysics(),
-                        padding: EdgeInsets.only(bottom: 10),
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 1,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: GestureDetector(
-                              onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => BodyHome())),
-                              child: BalanceCard(people: widget.people),
-                            ),
-                          );
-                        },
-                      ),
                     ),
                   ),
                 ),
@@ -225,25 +230,34 @@ class _AccountState extends State<Account> {
                 Padding(
                   padding: const EdgeInsets.only(
                     left: 25.0,
-                    bottom: 15,
-                    top: 15,
+                    bottom: 10,
+                    top: 10,
                   ),
-                  child: Text(
-                    widget.people.pendingPayments.toString() +
-                        ' pagamentos pendentes',
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
+                  child: StreamBuilder<DocumentSnapshot>(
+                      stream: Gets.getPeopleStream(widget.people.id),
+                      builder: (context, snapshot) {
+                        //Trata Load
+                        if (snapshot.connectionState == ConnectionState.waiting)
+                          return Center(child: Container());
+
+                        //Trata Erro
+                        if (snapshot.hasError)
+                          return Center(child: Text(snapshot.error.toString()));
+
+                        return Text(
+                          snapshot.data.get('pagamentospendentes').toString() +
+                              ' pagamentos pendentes',
+                          style: TextStyle(
+                            color: Colors.grey,
+                          ),
+                        );
+                      }),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     StreamBuilder<QuerySnapshot>(
-                      stream: Gets.getPaymentsQuery(FirebaseFirestore.instance
-                              .collection('pessoas')
-                              .doc(widget.people.id))
-                          .snapshots(),
+                      stream: Gets.getPaymentsStream(widget.people.id),
                       builder: (context, snapshot) {
                         //Trata Load
                         if (snapshot.connectionState ==
@@ -281,6 +295,9 @@ class _AccountState extends State<Account> {
                     ),
                   ],
                 ),
+                SizedBox(
+                  height: defaultPadding,
+                )
               ],
             ),
           ),

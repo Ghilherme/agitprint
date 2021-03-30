@@ -2,6 +2,7 @@ import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../extract/accounts.dart';
 import '../constants.dart';
@@ -65,7 +66,8 @@ class BodyHome extends StatelessWidget {
                 ),
                 TextSpan(text: '\n'),
                 TextSpan(
-                  text: "R\$" + people.balance.toStringAsFixed(2),
+                  text: NumberFormat.simpleCurrency(locale: "pt_BR")
+                      .format(people.balance),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ],

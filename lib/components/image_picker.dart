@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -99,7 +100,13 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
                   ? Container(
                       height: 200,
                       child: ElevatedButton.icon(
-                        label: Text('Imagem de fundo'),
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.grey.shade300)),
+                        label: Text(
+                          'Comprovante',
+                          style: GoogleTextStyles.customTextStyle(),
+                        ),
                         icon: Icon(Icons.add_a_photo, color: Colors.grey[600]),
                         onPressed: () {
                           showModal(context);
@@ -112,13 +119,22 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        IconButton(
+                          iconSize: 25,
+                          color: Colors.blue,
+                          icon: Icon(Icons.add_a_photo),
+                          onPressed: () {
+                            showModal(context);
+                          },
+                        ),
+                        Container(width: 20),
                         _imageFile == null
                             ? Container()
                             : IconButton(
                                 icon: Icon(
                                   Icons.cancel,
-                                  size: 35,
-                                  color: textLightColor,
+                                  size: 25,
+                                  color: Colors.red,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -126,15 +142,6 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
                                   });
                                 },
                               ),
-                        Container(width: 20),
-                        IconButton(
-                          iconSize: 40,
-                          color: Colors.blue,
-                          icon: Icon(Icons.add_a_photo),
-                          onPressed: () {
-                            showModal(context);
-                          },
-                        )
                       ],
                     ),
             ],

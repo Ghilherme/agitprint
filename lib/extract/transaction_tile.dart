@@ -1,6 +1,8 @@
+import 'package:agitprint/extract/receipt_dialog.dart';
 import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionTile extends StatefulWidget {
   final PaymentsModel payment;
@@ -18,34 +20,46 @@ class _TransactionTileState extends State<TransactionTile> {
       child: ListTile(
         dense: true,
         trailing: Text(
-          "R\$ ${widget.payment.amount.toStringAsFixed(2)}",
+          NumberFormat.simpleCurrency(locale: "pt_BR")
+              .format(widget.payment.amount),
           style: TextStyle(
               inherit: true, fontWeight: FontWeight.w700, fontSize: 16.0),
         ),
         leading: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Material(
-            elevation: 10,
-            shape: CircleBorder(),
-            shadowColor: Color(0xFFffd60f).withOpacity(0.4),
-            child: Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                color: widget.payment.status == Status.pending
-                    ? Color(0xFFffd60f)
-                    : Colors.green,
-                shape: BoxShape.circle,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: checkIconType(),
+          child: GestureDetector(
+            onTap: () => showDialog(
+                context: context,
+                builder: (context) {
+                  return ReceiptDialog(
+                    payment: widget.payment,
+                  );
+                }),
+            child: Material(
+              elevation: 10,
+              shape: CircleBorder(),
+              shadowColor: Color(0xFFffd60f).withOpacity(0.4),
+              child: Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: widget.payment.status == Status.pending
+                      ? Color(0xFFffd60f)
+                      : Colors.green,
+                  shape: BoxShape.circle,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: checkIconType(),
+                ),
               ),
             ),
           ),
         ),
         title: Text(
-          widget.payment.description,
+          widget.payment.description.isEmpty
+              ? 'Transação'
+              : widget.payment.description,
           overflow: TextOverflow.fade,
           style: TextStyle(
               inherit: true, fontWeight: FontWeight.w700, fontSize: 16.0),

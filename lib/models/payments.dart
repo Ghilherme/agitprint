@@ -8,15 +8,16 @@ class PaymentsModel {
       this.description,
       this.type,
       this.filial,
+      this.providerName,
       this.imageReceipt,
       this.createdAt,
       this.actionDate,
       this.status});
-  String id, description, type, filial, imageReceipt, status;
+  String id, description, type, filial, imageReceipt, status, providerName;
   num amount;
   DocumentReference idProvider, idPeople;
 
-  DateTime actionDate, createdAt;
+  DateTime actionDate, createdAt, receiptDate;
 
   PaymentsModel.fromPayment(PaymentsModel payment) {
     this.id = payment.id;
@@ -26,9 +27,11 @@ class PaymentsModel {
     this.description = payment.description;
     this.type = payment.type;
     this.filial = payment.filial;
+    this.providerName = payment.providerName;
     this.imageReceipt = payment.imageReceipt;
     this.createdAt = payment.createdAt;
     this.actionDate = payment.actionDate;
+    this.receiptDate = payment.receiptDate;
     this.status = payment.status;
   }
   PaymentsModel.fromFirestore(QueryDocumentSnapshot snapshot) {
@@ -39,6 +42,7 @@ class PaymentsModel {
     this.description = snapshot.data()['descricao'];
     this.type = snapshot.data()['tipo'];
     this.filial = snapshot.data()['filial'];
+    this.providerName = snapshot.data()['nomefornecedor'];
     this.imageReceipt = snapshot.data()['comprovante'];
     this.createdAt = snapshot.data()['datasolicitacao'] == null
         ? null
@@ -46,6 +50,9 @@ class PaymentsModel {
     this.actionDate = snapshot.data()['dataacao'] == null
         ? null
         : snapshot.data()['dataacao'].toDate();
+    this.receiptDate = snapshot.data()['datacomprovante'] == null
+        ? null
+        : snapshot.data()['datacomprovante'].toDate();
     this.status = snapshot.data()['status'];
   }
 
@@ -54,9 +61,11 @@ class PaymentsModel {
     this.description = '';
     this.type = '';
     this.filial = '';
+    this.providerName = '';
     this.imageReceipt = '';
     this.createdAt = null;
     this.actionDate = null;
+    this.receiptDate = null;
     this.status = '';
   }
 }

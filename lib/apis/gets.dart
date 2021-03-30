@@ -52,11 +52,21 @@ class Gets {
         .where('status', isEqualTo: Status.active);
   }
 
-  static Query getPaymentsQuery(DocumentReference idPeople) {
+  static Stream<QuerySnapshot> getPaymentsStream(String idPeople) {
+    DocumentReference doc =
+        FirebaseFirestore.instance.collection('pessoas').doc(idPeople);
     return FirebaseFirestore.instance
         .collection('pagamentos')
-        .where('pessoa', isEqualTo: idPeople)
-        .orderBy('datasolicitacao');
+        .where('pessoa', isEqualTo: doc)
+        .orderBy('datasolicitacao')
+        .snapshots();
+  }
+
+  static Stream<DocumentSnapshot> getPeopleStream(String idPeople) {
+    return FirebaseFirestore.instance
+        .collection('pessoas')
+        .doc(idPeople)
+        .snapshots();
   }
 
   static Future<List<BankModel>> readBankJson() async {

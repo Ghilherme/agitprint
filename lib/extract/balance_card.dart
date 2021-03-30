@@ -1,6 +1,7 @@
 import 'package:agitprint/models/people.dart';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../constants.dart';
 
@@ -38,8 +39,9 @@ class BalanceCard extends StatelessWidget {
                   height: 15,
                 ),
                 Text(
-                  r'R$ ' + people.balance.toStringAsFixed(2),
-                  style: Theme.of(context).textTheme.headline.copyWith(
+                  NumberFormat.simpleCurrency(locale: "pt_BR")
+                      .format(people.balance),
+                  style: Theme.of(context).textTheme.headline5.copyWith(
                         color: people.balance.isNegative
                             ? Colors.red
                             : Colors.green,

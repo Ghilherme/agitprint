@@ -15,8 +15,10 @@ import '../constants.dart';
 class UpdateBalanceDialog extends StatefulWidget {
   final PeopleModel people;
   final Function(num) callback;
+  final bool isAdd;
 
-  const UpdateBalanceDialog({Key key, this.people, this.callback})
+  const UpdateBalanceDialog(
+      {Key key, this.people, this.callback, this.isAdd = true})
       : super(key: key);
 
   @override
@@ -33,7 +35,7 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
     return Form(
       key: _form,
       child: SimpleDialog(
-        title: Text('Acrescentar saldo:'),
+        title: Text(widget.isAdd ? 'Adicionar Saldo:' : 'Retirar Saldo:'),
         children: [
           Padding(
             padding: const EdgeInsets.all(defaultPadding),
@@ -59,26 +61,33 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
                   height: defaultPadding,
                 ),
                 CustomTextFormField(
-                    textInputType: TextInputType.number,
-                    textCapitalization: TextCapitalization.none,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      RealInputFormatter(centavos: true)
-                    ],
-                    labelText: r"R$",
-                    initialValue: '',
-                    border: Borders.customOutlineInputBorder(),
-                    enabledBorder: Borders.customOutlineInputBorder(),
-                    focusedBorder: Borders.customOutlineInputBorder(
-                      color: const Color(0xFF655796),
-                    ),
-                    labelStyle: GoogleTextStyles.customTextStyle(),
-                    hintTextStyle: GoogleTextStyles.customTextStyle(),
-                    textStyle: GoogleTextStyles.customTextStyle(),
-                    onChanged: (value) {
-                      _paymentModel.amount =
-                          UtilBrasilFields.converterMoedaParaDouble(value);
-                    }),
+                  textInputType: TextInputType.number,
+                  textCapitalization: TextCapitalization.none,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    RealInputFormatter(centavos: true)
+                  ],
+                  labelText: r"R$",
+                  initialValue: '',
+                  border: Borders.customOutlineInputBorder(),
+                  enabledBorder: Borders.customOutlineInputBorder(),
+                  focusedBorder: Borders.customOutlineInputBorder(
+                    color: const Color(0xFF655796),
+                  ),
+                  labelStyle: GoogleTextStyles.customTextStyle(),
+                  hintTextStyle: GoogleTextStyles.customTextStyle(),
+                  textStyle: GoogleTextStyles.customTextStyle(),
+                  onChanged: (value) {
+                    _paymentModel.amount =
+                        UtilBrasilFields.converterMoedaParaDouble(value);
+                  },
+                  validator: (value) {
+                    if (value.isEmpty) return 'Campo obrigatório';
+
+                    if (value == '0,00') return 'Valor necessário';
+                    return null;
+                  },
+                ),
                 SizedBox(
                   height: defaultPadding,
                 ),
@@ -93,7 +102,7 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
                       ),
                     )
                   : ElevatedButton(
-                      child: Text('Adicionar'),
+                      child: Text(widget.isAdd ? 'Creditar' : 'Debitar'),
                       onPressed: () {
                         updateBalance(_paymentModel);
                       }))
@@ -118,8 +127,12 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
       //Solicitação inicia sempre como ativa
       _paymentModel.status = Status.active;
 
-      _paymentModel.type =
-          _paymentModel.amount.isNegative ? 'Débito' : 'Crédito';
+      if (widget.isAdd) {
+        _paymentModel.type = 'Crédito';
+      } else {
+        _paymentModel.type = 'Débito';
+        _paymentModel.amount = -_paymentModel.amount;
+      }
 
       //referencia id da atual pessoa desse extrato
       _paymentModel.idPeople = FirebaseFirestore.instance
@@ -129,6 +142,11 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
       _paymentModel.idProvider = FirebaseFirestore.instance
           .collection('fornecedores')
           .doc(fazerLogar.id);
+      await FirebaseFirestore.instance
+          .collection('fornecedores')
+          .doc(fazerLogarFornecedor.id)
+          .get()
+          .then((value) => _paymentModel.providerName = value.data()['nome']);
 
       Sets.setBalanceTransaction(_paymentModel, false)
           .then((value) => showDialog(

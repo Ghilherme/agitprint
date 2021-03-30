@@ -129,6 +129,7 @@ class _PaymentBodyState extends State<PaymentBody> {
             icon: Icon(Icons.arrow_downward),
             iconSize: 24,
             onChanged: (ProvidersModel newValue) {
+              _paymentModel.providerName = newValue.name;
               _paymentModel.idProvider = FirebaseFirestore.instance
                   .collection('fornecedores')
                   .doc(newValue.id);
@@ -250,7 +251,12 @@ class _PaymentBodyState extends State<PaymentBody> {
             _paymentModel.amount =
                 UtilBrasilFields.converterMoedaParaDouble(value);
           },
-          validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
+          validator: (value) {
+            if (value.isEmpty) return 'Campo obrigatório';
+
+            if (value == '0,00') return 'Valor necessário';
+            return null;
+          },
         ),
         SizedBox(
           height: defaultPadding,
@@ -300,7 +306,9 @@ class _PaymentBodyState extends State<PaymentBody> {
       _paymentModel.status = Status.pending;
 
       //sempre debito quando passa por essa tela
-      _paymentModel.amount = -_paymentModel.amount;
+      _paymentModel.amount = _paymentModel.amount.isNegative
+          ? _paymentModel.amount
+          : -_paymentModel.amount;
 
       Sets.setBalanceTransaction(_paymentModel, true)
           .then((value) => showDialog(

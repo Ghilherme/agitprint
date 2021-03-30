@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:agitprint/apis/gets.dart';
+import 'package:agitprint/apis/uploads.dart';
 import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
@@ -10,7 +10,6 @@ import 'package:agitprint/constants.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -299,13 +298,6 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     });
   }
 
-  Future<String> uploadFileImage(String refPath, String filePath) async {
-    File file = File(filePath);
-
-    await FirebaseStorage.instance.ref(refPath).putFile(file);
-    return await FirebaseStorage.instance.ref(refPath).getDownloadURL();
-  }
-
   void saveContact() async {
     if (_form.currentState.validate()) {
       setState(() {
@@ -316,11 +308,13 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
       DocumentReference contactDB =
           FirebaseFirestore.instance.collection('pessoas').doc(_peopleModel.id);
 
+      String refPath =
+          'uploads/' + contactDB.id + '/' + contactDB.id + '_avatar.png';
+
       //Se houve alteração na imagem, faz um novo upload
       if (_fileAvatarUpload.isNotEmpty)
-        _peopleModel.imageAvatar = await uploadFileImage(
-            'uploads/' + contactDB.id + '/' + contactDB.id + '_avatar.png',
-            _fileAvatarUpload);
+        _peopleModel.imageAvatar =
+            await Uploads.uploadFileImage(refPath, _fileAvatarUpload);
 
       if (_peopleModel.createdAt == null)
         _peopleModel.createdAt = DateTime.now();

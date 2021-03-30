@@ -22,3 +22,5 @@ const List<String> paymentType = const [
 
 DocumentReference fazerLogar =
     FirebaseFirestore.instance.doc('/pessoas/SXeqcWVuTpMbQspsgGFG');
+DocumentReference fazerLogarFornecedor =
+    FirebaseFirestore.instance.doc('/fornecedores/cdqXhxA0HSwV8vuRKqrw');

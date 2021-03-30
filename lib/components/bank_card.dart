@@ -57,13 +57,13 @@ class _BankCardState extends State<BankCard> {
         children: <Widget>[
           widget.isEditable
               ? Positioned(
-                  top: 50,
+                  top: 60,
                   right: -5,
                   child: Container(
                     padding: EdgeInsets.all(0),
                     child: IconButton(
                       icon: Icon(
-                        Icons.edit_rounded,
+                        Icons.arrow_forward_ios,
                         size: 20,
                         color: Colors.redAccent,
                       ),
@@ -79,7 +79,7 @@ class _BankCardState extends State<BankCard> {
                     padding: EdgeInsets.all(0),
                     child: IconButton(
                       icon: Icon(
-                        Icons.edit_rounded,
+                        Icons.arrow_forward_ios,
                         size: 20,
                         color: Colors.redAccent,
                       ),
@@ -123,6 +123,7 @@ class _BankCardState extends State<BankCard> {
             ),
           ),
           Container(
+            height: 201,
             width: _media.width - 40,
             padding: EdgeInsets.only(right: 30, top: 30, left: 30, bottom: 10),
             child: Column(
@@ -267,7 +268,7 @@ class _BankCardState extends State<BankCard> {
         break;
 
       default:
-        bankAsset = 'assets/images/bank_logo.jpg';
+        bankAsset = 'assets/images/bank_logo.png';
     }
 
     return Image(
