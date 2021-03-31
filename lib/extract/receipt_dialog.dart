@@ -109,25 +109,22 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     String refPath =
         'pagamentos/' + paymentDB.id + '/' + paymentDB.id + '_recibo.png';
 
-    num _pendingPayment = 0;
+    num _pendingPaymentQtnAdd = 0;
 
-    //se tiver imagem anexada
-    if (_fileReceiptUpload.isNotEmpty) {
-      if (_paymentsModel.imageReceipt.isEmpty)
-        //if se ja tiver upload antes, tira pagamento pendente
-        _pendingPayment -= 1;
-
-      _paymentsModel.imageReceipt =
-          await Uploads.uploadFileImage(refPath, _fileReceiptUpload);
-    }
-    //senao, esta querendo tirar imagem
-    else {
-      if (_paymentsModel.imageReceipt.isNotEmpty) {
-        //if se ja tiver upload antes
-        Deletes.deleteFileImage(refPath);
+    if (_paymentsModel.status == Status.pending) {
+      if (_fileReceiptUpload.isNotEmpty) {
+        _paymentsModel.imageReceipt =
+            await Uploads.uploadFileImage(refPath, _fileReceiptUpload);
+        _pendingPaymentQtnAdd -= 1;
       }
-      _pendingPayment += 1;
-      _paymentsModel.imageReceipt = '';
+    }
+
+    if (_paymentsModel.status == Status.active) {
+      if (_fileReceiptUpload.isEmpty) {
+        Deletes.deleteFileImage(refPath);
+        _pendingPaymentQtnAdd += 1;
+        _paymentsModel.imageReceipt = '';
+      }
     }
 
     _fileReceiptUpload.isEmpty
@@ -137,7 +134,7 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     //Sempre atualiza data do anexo comprovante
     _paymentsModel.receiptDate = DateTime.now();
 
-    Updates.attachReceiptTransaction(_paymentsModel, _pendingPayment)
+    Updates.attachReceiptTransaction(_paymentsModel, _pendingPaymentQtnAdd)
         .then((value) => showDialog(
               context: context,
               builder: (context) {

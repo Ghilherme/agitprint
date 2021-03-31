@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Updates {
   static Future<dynamic> attachReceiptTransaction(
-      PaymentsModel _paymentModel, num pendingPaymentQuantity) {
+      PaymentsModel _paymentModel, num pendingPaymentQuantityAdd) {
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       //Referencia pagamento
       DocumentReference paymentDB = FirebaseFirestore.instance
@@ -27,7 +27,7 @@ class Updates {
 
       //atualiza pagamentos pendentes
       num _pendingPayment =
-          pendingPaymentQuantity + people.data()['pagamentospendentes'];
+          pendingPaymentQuantityAdd + people.data()['pagamentospendentes'];
       transaction.update(ref, {'pagamentospendentes': _pendingPayment});
     });
   }

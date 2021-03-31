@@ -1,3 +1,4 @@
+import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -56,22 +57,33 @@ class BodyHome extends StatelessWidget {
             people.name,
             style: TextStyle(fontWeight: FontWeight.w500),
           ),
-          trailing: RichText(
-            textAlign: TextAlign.right,
-            text: TextSpan(
-              style: TextStyle(color: Colors.black),
-              children: [
-                TextSpan(
-                  text: people.pendingPayments.toString(),
+          trailing: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  color:
+                      people.pendingPayments == 0 ? Colors.grey : Colors.green,
                 ),
-                TextSpan(text: '\n'),
-                TextSpan(
-                  text: NumberFormat.simpleCurrency(locale: "pt_BR")
-                      .format(people.balance),
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
+                child: Center(
+                    child: Text(
+                  people.pendingPayments.toString(),
+                  style: GoogleTextStyles.customTextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w300),
+                )),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 10),
+                child: Text(
+                    NumberFormat.simpleCurrency(locale: "pt_BR")
+                        .format(people.balance),
+                    style: GoogleTextStyles.customTextStyle(
+                        fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
