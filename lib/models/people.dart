@@ -4,7 +4,6 @@ class PeopleModel {
   PeopleModel(
       {this.name,
       this.email,
-      this.login,
       this.password,
       this.balance,
       this.profiles,
@@ -18,7 +17,6 @@ class PeopleModel {
   String id,
       name,
       email,
-      login,
       password,
       directorship,
       regionalGroup,
@@ -34,7 +32,6 @@ class PeopleModel {
     this.id = people.id;
     this.name = people.name;
     this.email = people.email;
-    this.login = people.login;
     this.password = people.password;
     this.balance = people.balance;
     this.profiles = people.profiles;
@@ -50,7 +47,6 @@ class PeopleModel {
     this.id = snapshot.id;
     this.name = snapshot.data()['nome'];
     this.email = snapshot.data()['email'];
-    this.login = snapshot.data()['login'];
     this.password = snapshot.data()['senha'];
     this.balance = snapshot.data()['saldo'];
     this.profiles = snapshot.data()['perfil'];
@@ -70,7 +66,6 @@ class PeopleModel {
   PeopleModel.empty() {
     this.name = '';
     this.email = '';
-    this.login = '';
     this.password = '';
     this.balance = 0.0;
     this.profiles = [];

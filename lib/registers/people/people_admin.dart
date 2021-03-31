@@ -10,6 +10,7 @@ import 'package:agitprint/constants.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -154,27 +155,6 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           height: defaultPadding,
         ),
         CustomTextFormField(
-          textInputType: TextInputType.emailAddress,
-          textCapitalization: TextCapitalization.characters,
-          labelText: "Login",
-          initialValue: _peopleModel.login,
-          border: Borders.customOutlineInputBorder(),
-          enabledBorder: Borders.customOutlineInputBorder(),
-          focusedBorder: Borders.customOutlineInputBorder(
-            color: AppColors.violetShade200,
-          ),
-          labelStyle: GoogleTextStyles.customTextStyle(),
-          hintTextStyle: GoogleTextStyles.customTextStyle(),
-          textStyle: GoogleTextStyles.customTextStyle(),
-          onChanged: (value) {
-            _peopleModel.login = value.trim();
-          },
-          validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
-        ),
-        SizedBox(
-          height: defaultPadding,
-        ),
-        CustomTextFormField(
           textInputType: TextInputType.visiblePassword,
           textCapitalization: TextCapitalization.none,
           labelText: "Senha",
@@ -281,7 +261,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
             color: AppColors.blue,
             height: 40,
             onPressed: () {
-              saveContact();
+              savePeople();
             },
           ),
         ),
@@ -298,11 +278,35 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     });
   }
 
-  void saveContact() async {
+  void savePeople() async {
     if (_form.currentState.validate()) {
       setState(() {
         _progressBarActive = true;
       });
+
+      try {
+        if (_peopleModel.id == null)
+          UserCredential userCredential = await FirebaseAuth.instance
+              .createUserWithEmailAndPassword(
+                  email: _peopleModel.email, password: _peopleModel.password);
+        else {
+          await FirebaseAuth.instance
+              .sendPasswordResetEmail(email: _peopleModel.email);
+        }
+      } on FirebaseAuthException catch (e) {
+        String error = e.message;
+        if (e.code == 'weak-password') {
+          error = 'Senha fraca. Necessário mínimo de 6 caracteres.';
+        } else if (e.code == 'email-already-in-use') {
+          error = 'Usuário já cadastrado para esse email!';
+        }
+        final snackBar = SnackBar(content: Text(error));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        setState(() {
+          _progressBarActive = false;
+        });
+        return;
+      }
 
       //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
       DocumentReference contactDB =
@@ -328,7 +332,6 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           .set({
             'nome': _peopleModel.name,
             'email': _peopleModel.email,
-            'login': _peopleModel.login,
             'senha': _peopleModel.password,
             'saldo': _peopleModel.balance,
             'perfil': _peopleModel.profiles,
