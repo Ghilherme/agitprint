@@ -11,16 +11,26 @@ const defaultPadding = 20.0;
 const defaultPaddingListView = 5.0;
 const textLightColor = Color(0xFFACACAC);
 
-List<MultiSelectItem> profiles = [
-  const MultiSelectItem('admin', 'admin'),
-  const MultiSelectItem('admin2', 'admin2')
+List<MultiSelectItem> acesses = [
+  const MultiSelectItem('admin0', 'Gerenciar acessos'),
+  const MultiSelectItem('admin1', 'Creditar saldo'),
+  const MultiSelectItem('admin2', 'Debitar saldo'),
+  const MultiSelectItem('admin3', 'Visualizar lista pessoas'),
+  const MultiSelectItem('admin4', 'Gerenciar pessoas'),
+  const MultiSelectItem('admin5', 'Gerenciar diretorias'),
+  const MultiSelectItem('user0', 'Solicitar pagamento'),
+  const MultiSelectItem('user1', 'Gerenciar fornecedores'),
+  const MultiSelectItem('user2', 'Gerenciar categorias'),
+  const MultiSelectItem('user3', 'Adicionar comprovantes anexo'),
 ];
 const List<String> paymentType = const [
   'Compras',
   'Ação',
 ];
 
-DocumentReference fazerLogar =
-    FirebaseFirestore.instance.doc('/pessoas/SXeqcWVuTpMbQspsgGFG');
-DocumentReference fazerLogarFornecedor =
-    FirebaseFirestore.instance.doc('/fornecedores/cdqXhxA0HSwV8vuRKqrw');
+DocumentReference idPeopleLogged;
+List<String> acessPeopleLogged = [];
+String directorshipPeopleLogged;
+String namePeopleLogged;
+String emailPeopleLogged;
+String avatarPeopleLogger;

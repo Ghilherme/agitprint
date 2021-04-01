@@ -78,6 +78,8 @@ class ListProvidersAdmin extends StatelessWidget {
 
     index -= 1;
     ProvidersModel providers = ProvidersModel.fromFirestore(snapshot[index]);
+    if (directorshipPeopleLogged != 'ALL' && providers.directorship == 'ALL')
+      return Container();
 
     return Column(children: <Widget>[
       ListTileAdmin(

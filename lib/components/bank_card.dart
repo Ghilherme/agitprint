@@ -1,6 +1,6 @@
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/google_text_styles.dart';
-import 'package:agitprint/components/validators_utils.dart';
+import 'package:agitprint/components/field_validators.dart';
 import 'package:agitprint/models/bank_accounts.dart';
 import 'package:agitprint/models/banks.dart';
 import 'package:brasil_fields/brasil_fields.dart';
@@ -172,7 +172,7 @@ class _BankCardState extends State<BankCard> {
                                 ? Container()
                                 : Text(
                                     'CPF: ' +
-                                        ValidatorUtils.obterCpf(
+                                        FieldValidators.obterCpf(
                                             _bank.pix['cpf']),
                                     style: GoogleFonts.roboto(
                                       fontSize: 15,
@@ -187,7 +187,7 @@ class _BankCardState extends State<BankCard> {
                                 ? Container()
                                 : Text(
                                     'CNPJ: ' +
-                                        ValidatorUtils.obterCnpj(
+                                        FieldValidators.obterCnpj(
                                             _bank.pix['cnpj']),
                                     style: TextStyle(
                                       fontSize: 16,
@@ -202,7 +202,7 @@ class _BankCardState extends State<BankCard> {
                                 ? Container()
                                 : Text(
                                     'Telefone: ' +
-                                        ValidatorUtils.obterTelefone(
+                                        FieldValidators.obterTelefone(
                                             _bank.pix['telefone']),
                                     style: TextStyle(
                                       fontSize: 16,
@@ -406,7 +406,7 @@ class _BankCardState extends State<BankCard> {
   }
 
   buildDialogPix(BuildContext context) {
-    String _telefone = ValidatorUtils.obterTelefone(_bank.pix['telefone']);
+    String _telefone = FieldValidators.obterTelefone(_bank.pix['telefone']);
 
     showDialog(
       context: context,
@@ -477,7 +477,7 @@ class _BankCardState extends State<BankCard> {
                       textStyle: GoogleTextStyles.customTextStyle(),
                       onChanged: (value) {
                         _bank.pix['telefone'] =
-                            ValidatorUtils.extrairTelefone(value.trim());
+                            FieldValidators.extrairTelefone(value.trim());
                       }),
                   SizedBox(
                     height: defaultPadding,

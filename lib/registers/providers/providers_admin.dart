@@ -6,7 +6,7 @@ import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
-import 'package:agitprint/components/validators_utils.dart';
+import 'package:agitprint/components/field_validators.dart';
 import 'package:agitprint/constants.dart';
 import 'package:agitprint/models/bank_accounts.dart';
 import 'package:agitprint/models/providers.dart';
@@ -84,6 +84,12 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
                   value: dir,
                 ))
             .toList();
+
+        if (directorshipPeopleLogged == 'ALL')
+          _itemsDropDown.add(DropdownMenuItem<String>(
+            child: Text('Administrador'),
+            value: 'ALL',
+          ));
       });
     }
   }
@@ -341,8 +347,8 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
           'conta': element.account,
           'contapoupanca': element.savingAccount,
           'pix': {
-            'cpf': ValidatorUtils.removeCaracteres(element.pix['cpf']),
-            'cnpj': ValidatorUtils.removeCaracteres(element.pix['cnpj']),
+            'cpf': FieldValidators.removeCaracteres(element.pix['cpf']),
+            'cnpj': FieldValidators.removeCaracteres(element.pix['cnpj']),
             'telefone': element.pix['telefone'],
             'email': element.pix['email'],
           },
@@ -352,8 +358,8 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
       contactDB
           .set({
             'nome': _providersModel.name,
-            'cpf': ValidatorUtils.removeCaracteres(_providersModel.cpf),
-            'cnpj': ValidatorUtils.removeCaracteres(_providersModel.cnpj),
+            'cpf': FieldValidators.removeCaracteres(_providersModel.cpf),
+            'cnpj': FieldValidators.removeCaracteres(_providersModel.cnpj),
             'diretoria': _providersModel.directorship,
             'categorias': _providersModel.categories,
             'contas': _bankAccounts,

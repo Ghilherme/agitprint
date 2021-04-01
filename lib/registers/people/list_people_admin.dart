@@ -80,6 +80,8 @@ class ListPeopleAdmin extends StatelessWidget {
 
     index -= 1;
     PeopleModel people = PeopleModel.fromFirestore(snapshot[index]);
+    if (directorshipPeopleLogged != 'ALL' && people.directorship == 'ALL')
+      return Container();
 
     return Column(children: <Widget>[
       ListTileAdmin(

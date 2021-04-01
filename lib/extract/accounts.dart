@@ -113,39 +113,43 @@ class _AccountState extends State<Account> {
                                   fontFamily: "Varela"),
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 36,
-                            ),
-                            onPressed: () => showDialog(
-                              context: context,
-                              builder: (context) {
-                                return UpdateBalanceDialog(
-                                  people: widget.people,
-                                  callback: callbackBalance,
-                                );
-                              },
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.remove_sharp,
-                              color: Colors.white,
-                              size: 36,
-                            ),
-                            onPressed: () => showDialog(
-                              context: context,
-                              builder: (context) {
-                                return UpdateBalanceDialog(
-                                  people: widget.people,
-                                  callback: callbackBalance,
-                                  isAdd: false,
-                                );
-                              },
-                            ),
-                          ),
+                          acessPeopleLogged.contains('admin1')
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 36,
+                                  ),
+                                  onPressed: () => showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return UpdateBalanceDialog(
+                                        people: widget.people,
+                                        callback: callbackBalance,
+                                      );
+                                    },
+                                  ),
+                                )
+                              : Container(),
+                          acessPeopleLogged.contains('admin2')
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.remove_sharp,
+                                    color: Colors.white,
+                                    size: 36,
+                                  ),
+                                  onPressed: () => showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return UpdateBalanceDialog(
+                                        people: widget.people,
+                                        callback: callbackBalance,
+                                        isAdd: false,
+                                      );
+                                    },
+                                  ),
+                                )
+                              : Container(),
                         ],
                       ),
                     ],

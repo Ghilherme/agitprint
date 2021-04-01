@@ -7,7 +7,7 @@ import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
-import 'package:agitprint/components/validators_utils.dart';
+import 'package:agitprint/components/field_validators.dart';
 import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
@@ -58,7 +58,7 @@ class _PaymentBodyState extends State<PaymentBody> {
     super.initState();
     _getProviders();
     _paymentModel = PaymentsModel.empty();
-    _paymentModel.idPeople = fazerLogar;
+    _paymentModel.idPeople = idPeopleLogged;
   }
 
   void _getProviders() async {
@@ -78,10 +78,10 @@ class _PaymentBodyState extends State<PaymentBody> {
   String displayProvider(ProvidersModel provider) {
     String strBuild = provider.name + ' - ';
     if (provider.cnpj.isNotEmpty)
-      strBuild += ValidatorUtils.obterCnpj(provider.cnpj);
+      strBuild += FieldValidators.obterCnpj(provider.cnpj);
 
     if (provider.cpf.isNotEmpty)
-      strBuild += ValidatorUtils.obterCpf(provider.cpf);
+      strBuild += FieldValidators.obterCpf(provider.cpf);
 
     if (provider.categories.first.isNotEmpty)
       strBuild += ' (' + provider.categories.first + ')';

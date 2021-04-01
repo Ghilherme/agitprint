@@ -77,15 +77,18 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
             SizedBox(
               height: defaultPadding,
             ),
-            Center(
-                child: _progressBarActive
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.white,
-                        ),
-                      )
-                    : ElevatedButton(
-                        child: Text('Anexar recibo'), onPressed: attachReceipt))
+            acessPeopleLogged.contains('admin3')
+                ? Center(
+                    child: _progressBarActive
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.white,
+                            ),
+                          )
+                        : ElevatedButton(
+                            child: Text('Anexar recibo'),
+                            onPressed: attachReceipt))
+                : Container()
           ],
         ));
   }

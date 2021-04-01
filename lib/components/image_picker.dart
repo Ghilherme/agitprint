@@ -150,18 +150,18 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
 
   ImageProvider _previewImage() {
     final Text retrieveError = _getRetrieveErrorWidget();
-    if (retrieveError != null) {
+    if (retrieveError != null)
       return Image.file(File('assets/images/error_message.png')).image;
-    }
+
     if (_imageFile != null) {
-      if (kIsWeb) {
+      if (kIsWeb)
         return Image.network(_imageFile.path).image;
-      } else {
+      else
         return Image.file(File(_imageFile.path)).image;
-      }
-    } else if (_pickImageError != null) {
+    } else if (_pickImageError != null)
       return Image.file(File('assets/images/error_message.png')).image;
-    }
+
+    return null;
   }
 
   Text _getRetrieveErrorWidget() {

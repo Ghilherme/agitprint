@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_drawer.dart';
 import '../constants.dart';
 import 'body_home.dart';
+import 'body_home_list_people.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,14 +25,18 @@ class _HomeScreenState extends State<HomeScreen> {
             centerTitle: true,
             title: Text(mainTitleApp),
           ),
-          body: BodyHome(),
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.attach_money),
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => Payment()));
-            },
-          ),
+          body: acessPeopleLogged.contains('admin3')
+              ? BodyHomeListPeople()
+              : BodyHome(),
+          floatingActionButton: acessPeopleLogged.contains('user0')
+              ? FloatingActionButton(
+                  child: const Icon(Icons.attach_money),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => Payment()));
+                  },
+                )
+              : Container(),
         ));
   }
 }

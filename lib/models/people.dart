@@ -4,7 +4,6 @@ class PeopleModel {
   PeopleModel(
       {this.name,
       this.email,
-      this.password,
       this.balance,
       this.profiles,
       this.directorship,
@@ -14,14 +13,7 @@ class PeopleModel {
       this.createdAt,
       this.lastModification,
       this.status});
-  String id,
-      name,
-      email,
-      password,
-      directorship,
-      regionalGroup,
-      imageAvatar,
-      status;
+  String id, name, email, directorship, regionalGroup, imageAvatar, status;
   num balance;
   List<dynamic> profiles;
   int pendingPayments;
@@ -32,7 +24,6 @@ class PeopleModel {
     this.id = people.id;
     this.name = people.name;
     this.email = people.email;
-    this.password = people.password;
     this.balance = people.balance;
     this.profiles = people.profiles;
     this.directorship = people.directorship;
@@ -47,7 +38,6 @@ class PeopleModel {
     this.id = snapshot.id;
     this.name = snapshot.data()['nome'];
     this.email = snapshot.data()['email'];
-    this.password = snapshot.data()['senha'];
     this.balance = snapshot.data()['saldo'];
     this.profiles = snapshot.data()['perfil'];
     this.directorship = snapshot.data()['diretoria'];
@@ -66,7 +56,6 @@ class PeopleModel {
   PeopleModel.empty() {
     this.name = '';
     this.email = '';
-    this.password = '';
     this.balance = 0.0;
     this.profiles = [];
     this.directorship = '';

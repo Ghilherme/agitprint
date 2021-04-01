@@ -1,3 +1,4 @@
+import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/apis/sets.dart';
 import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
@@ -134,19 +135,17 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
         _paymentModel.amount = -_paymentModel.amount;
       }
 
-      //referencia id da atual pessoa desse extrato
+      //referencia id da atual pessoa desse extrato no qual sera feito o pagamento
       _paymentModel.idPeople = FirebaseFirestore.instance
           .collection('pessoas')
           .doc(widget.people.id);
-      //referencia admin como fornecedor
-      _paymentModel.idProvider = FirebaseFirestore.instance
-          .collection('fornecedores')
-          .doc(fazerLogar.id);
-      await FirebaseFirestore.instance
-          .collection('fornecedores')
-          .doc(fazerLogarFornecedor.id)
-          .get()
-          .then((value) => _paymentModel.providerName = value.data()['nome']);
+
+      //referencia o fornecedor que for admin (diretoria = ALL)
+      await Gets.getProvidersAdmin('ALL').then((value) {
+        _paymentModel.idProvider =
+            FirebaseFirestore.instance.collection('fornecedores').doc(value.id);
+        _paymentModel.providerName = value.name;
+      });
 
       Sets.setBalanceTransaction(_paymentModel, false)
           .then((value) => showDialog(

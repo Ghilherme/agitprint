@@ -5,6 +5,7 @@ import 'package:agitprint/registers/people/list_people_admin.dart';
 import 'package:agitprint/registers/providers/list_providers_admin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import './constants.dart';
 
@@ -15,52 +16,64 @@ class CustomDrawer extends StatelessWidget {
         child: Column(
       children: [
         UserAccountsDrawerHeader(
-            accountName: Text(mainTitleApp),
-            accountEmail: Text('email do logado')),
-        ListTile(
-          leading: Icon(Icons.people),
-          title: Text('Pessoas'),
-          subtitle: Text('Gerenciar pessoas'),
-          onTap: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => ListPeopleAdmin()));
-          },
-        ),
-        ListTile(
-            leading: Icon(Icons.business),
-            title: Text('Diretorias'),
-            subtitle: Text('Gerenciar diretorias'),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ListDirectorshipAdmin()));
-            }),
-        ListTile(
-            leading: Icon(Icons.payments),
-            title: Text('Fornecedores'),
-            subtitle: Text('Gerenciar fornecedores'),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ListProvidersAdmin()));
-            }),
-        ListTile(
-            leading: Icon(Icons.category),
-            title: Text('Categorias'),
-            subtitle: Text('Gerenciar categorias de fornecedores'),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ListCategoriesAdmin()));
-            }),
-        ListTile(
-          leading: Icon(Icons.no_encryption),
-          title: Text('Acessos'),
-          subtitle: Text('Gerenciar perfis de acesso'),
-          onTap: () {},
-        ),
+            currentAccountPicture: CircleAvatar(
+                radius: 25,
+                backgroundImage: avatarPeopleLogger == '' ||
+                        avatarPeopleLogger == null
+                    ? Image.network(urlAvatarInitials + namePeopleLogged).image
+                    : Image.network(avatarPeopleLogger).image),
+            accountName: Text(namePeopleLogged),
+            accountEmail: Text(emailPeopleLogged)),
+        acessPeopleLogged.contains('admin4')
+            ? ListTile(
+                leading: Icon(Icons.people),
+                title: Text('Pessoas'),
+                subtitle: Text('Gerenciar pessoas'),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ListPeopleAdmin()));
+                },
+              )
+            : Container(),
+        acessPeopleLogged.contains('admin5')
+            ? ListTile(
+                leading: Icon(Icons.business),
+                title: Text('Diretorias'),
+                subtitle: Text('Gerenciar diretorias'),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ListDirectorshipAdmin()));
+                })
+            : Container(),
+        acessPeopleLogged.contains('user1')
+            ? ListTile(
+                leading: Icon(Icons.payments),
+                title: Text('Fornecedores'),
+                subtitle: Text('Gerenciar fornecedores'),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ListProvidersAdmin()));
+                })
+            : Container(),
+        acessPeopleLogged.contains('user2')
+            ? ListTile(
+                leading: Icon(Icons.category),
+                title: Text('Categorias'),
+                subtitle: Text('Gerenciar categorias de fornecedores'),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ListCategoriesAdmin()));
+                })
+            : Container(),
         ListTile(
           leading: Icon(Icons.logout),
           title: Text('Sair'),
           subtitle: Text('Logout'),
-          onTap: () {
+          onTap: () async {
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            prefs.clear();
+
             FirebaseAuth.instance.signOut();
             Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => Login()));

@@ -1,3 +1,4 @@
+import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/clipShadowPath.dart';
 import 'package:agitprint/components/colors.dart';
@@ -6,8 +7,12 @@ import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/home/home_screen.dart';
 import 'package:agitprint/login/custom_clip.dart';
+import 'package:agitprint/models/people.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../constants.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -19,6 +24,7 @@ class _LoginState extends State<Login> {
   String _email;
   final _form = GlobalKey<FormState>();
   bool _progressBarActive = false;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
   Widget build(BuildContext context) {
@@ -201,9 +207,31 @@ class _LoginState extends State<Login> {
           _progressBarActive = false;
         });
       }
-      if (userCredential != null)
+      if (userCredential != null) {
+        final SharedPreferences prefs = await _prefs;
+        prefs.setBool('logado', true);
+
+        //armazena em cache as informacoes do logado
+        PeopleModel people = await Gets.getUserInfo(userCredential.user.email);
+        DocumentReference idPeople =
+            FirebaseFirestore.instance.collection('pessoas').doc(people.id);
+        prefs.setStringList('logado_acessos', List.from(people.profiles));
+        prefs.setString('logado_id', idPeople.path);
+        prefs.setString('logado_directorship', people.directorship);
+        prefs.setString('logado_email', people.email);
+        prefs.setString('logado_name', people.name);
+        prefs.setString('logado_avatar', people.imageAvatar);
+        //coloca na constants para uso em memoria do app
+        acessPeopleLogged = prefs.getStringList('logado_acessos');
+        idPeopleLogged = idPeople;
+        directorshipPeopleLogged = people.directorship;
+        namePeopleLogged = people.name;
+        emailPeopleLogged = people.email;
+        avatarPeopleLogger = people.imageAvatar;
+
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => HomeScreen()));
+      }
     }
   }
 }

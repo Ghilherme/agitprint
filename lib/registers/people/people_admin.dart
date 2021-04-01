@@ -55,6 +55,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
   String _fileAvatarUpload = '';
   List<DropdownMenuItem<String>> _items = [];
   String _dropdownDirectorship;
+  String _password;
 
   initState() {
     super.initState();
@@ -131,6 +132,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
             textInputType: TextInputType.emailAddress,
             textCapitalization: TextCapitalization.none,
             labelText: "Email",
+            enabled: _peopleModel.email.isEmpty ? true : false,
             initialValue: _peopleModel.email,
             border: Borders.customOutlineInputBorder(),
             enabledBorder: Borders.customOutlineInputBorder(),
@@ -154,29 +156,44 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        CustomTextFormField(
-          textInputType: TextInputType.visiblePassword,
-          textCapitalization: TextCapitalization.none,
-          labelText: "Senha",
-          initialValue: _peopleModel.password,
-          hasSuffixIcon: true,
-          suffixIcon: Icon(
-            Icons.lock,
-            color: AppColors.blackShade10,
-          ),
-          border: Borders.customOutlineInputBorder(),
-          enabledBorder: Borders.customOutlineInputBorder(),
-          focusedBorder: Borders.customOutlineInputBorder(
-            color: AppColors.violetShade200,
-          ),
-          labelStyle: GoogleTextStyles.customTextStyle(),
-          hintTextStyle: GoogleTextStyles.customTextStyle(),
-          textStyle: GoogleTextStyles.customTextStyle(),
-          onChanged: (value) {
-            _peopleModel.password = value.trim();
-          },
-          validator: (value) => value.isEmpty ? 'Campo obrigatório' : null,
-        ),
+        _peopleModel.id == null
+            ? CustomTextFormField(
+                textInputType: TextInputType.visiblePassword,
+                textCapitalization: TextCapitalization.none,
+                labelText: "Senha",
+                hasSuffixIcon: true,
+                suffixIcon: Icon(
+                  Icons.lock,
+                  color: AppColors.blackShade10,
+                ),
+                border: Borders.customOutlineInputBorder(),
+                enabledBorder: Borders.customOutlineInputBorder(),
+                focusedBorder: Borders.customOutlineInputBorder(
+                  color: AppColors.violetShade200,
+                ),
+                labelStyle: GoogleTextStyles.customTextStyle(),
+                hintTextStyle: GoogleTextStyles.customTextStyle(),
+                textStyle: GoogleTextStyles.customTextStyle(),
+                onChanged: (value) {
+                  _password = value.trim();
+                },
+                validator: (value) =>
+                    value.isEmpty ? 'Campo obrigatório' : null,
+              )
+            : Container(
+                height: 100,
+                child: ElevatedButton.icon(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Colors.grey.shade300)),
+                  label: Text(
+                    'Resetar senha',
+                    style: GoogleTextStyles.customTextStyle(),
+                  ),
+                  icon: Icon(Icons.add_a_photo, color: Colors.grey[600]),
+                  onPressed: () {},
+                ),
+              ),
         SizedBox(
           height: defaultPadding,
         ),
@@ -231,7 +248,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           ),
           child: MultiSelectDialogField(
               initialValue: _peopleModel.profiles,
-              items: profiles,
+              items: acesses,
               searchHintStyle: GoogleTextStyles.customTextStyle(),
               searchTextStyle: GoogleTextStyles.customTextStyle(),
               itemsTextStyle: GoogleTextStyles.customTextStyle(),
@@ -288,7 +305,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
         if (_peopleModel.id == null)
           UserCredential userCredential = await FirebaseAuth.instance
               .createUserWithEmailAndPassword(
-                  email: _peopleModel.email, password: _peopleModel.password);
+                  email: _peopleModel.email, password: _password);
         else {
           await FirebaseAuth.instance
               .sendPasswordResetEmail(email: _peopleModel.email);
@@ -332,7 +349,6 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           .set({
             'nome': _peopleModel.name,
             'email': _peopleModel.email,
-            'senha': _peopleModel.password,
             'saldo': _peopleModel.balance,
             'perfil': _peopleModel.profiles,
             'diretoria': _peopleModel.directorship,
@@ -399,6 +415,12 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
                 value: dir,
               ))
           .toList();
+
+      if (directorshipPeopleLogged == 'ALL')
+        _items.add(DropdownMenuItem<String>(
+          child: Text('Administrador'),
+          value: 'ALL',
+        ));
     });
   }
 }
