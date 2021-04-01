@@ -36,16 +36,16 @@ class Gets {
     return categories;
   }
 
-  static Query getProvidersQuery() {
+  static Query getAllActiveProvidersQuery() {
     return FirebaseFirestore.instance
         .collection('fornecedores')
         .orderBy('nome')
         .where('status', isEqualTo: Status.active);
   }
 
-  static Future<List<ProvidersModel>> getProviders() async {
+  static Future<List<ProvidersModel>> getAllActiveProviders() async {
     List<ProvidersModel> providers = [];
-    await getProvidersQuery().get().then((value) {
+    await getAllActiveProvidersQuery().get().then((value) {
       value.docs.forEach((element) {
         return providers.add(ProvidersModel.fromFirestore(element));
       });
@@ -53,20 +53,21 @@ class Gets {
     return providers;
   }
 
-  static Query _getProvidersAdminQuery(String directorship) {
+  static Query getProvidersByDirectorshipQuery(String directorship) {
     return FirebaseFirestore.instance
         .collection('fornecedores')
         .where('diretoria', isEqualTo: directorship);
   }
 
-  static Future<ProvidersModel> getProvidersAdmin(String directorship) async {
+  static Future<List<ProvidersModel>> getProviderByDirectorship(
+      String directorship) async {
     List<ProvidersModel> providers = [];
-    await _getProvidersAdminQuery(directorship).get().then((value) {
+    await getProvidersByDirectorshipQuery(directorship).get().then((value) {
       value.docs.forEach((element) {
         return providers.add(ProvidersModel.fromFirestore(element));
       });
     });
-    return providers.first;
+    return providers;
   }
 
   static Stream<QuerySnapshot> getPaymentsStream(String idPeople) {
@@ -77,6 +78,19 @@ class Gets {
         .where('pessoa', isEqualTo: doc)
         .orderBy('datasolicitacao')
         .snapshots();
+  }
+
+  static Query getPeopleByDirectorshipQuery(String directorship) {
+    return FirebaseFirestore.instance
+        .collection('pessoas')
+        .where('diretoria', isEqualTo: directorship);
+  }
+
+  static Query getAllActivePeopleQuery() {
+    return FirebaseFirestore.instance
+        .collection('pessoas')
+        .orderBy('nome')
+        .where('status', isEqualTo: Status.active);
   }
 
   static Stream<DocumentSnapshot> getPeopleStream(String idPeople) {

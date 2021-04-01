@@ -1,6 +1,7 @@
+import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/models/people.dart';
-import 'package:agitprint/models/status.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -11,10 +12,9 @@ import '../constants.dart';
 class BodyHomeListPeople extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Query query = FirebaseFirestore.instance
-        .collection('pessoas')
-        .orderBy('nome')
-        .where('status', isEqualTo: Status.active);
+    Query query = directorshipPeopleLogged == 'ALL'
+        ? Gets.getAllActivePeopleQuery()
+        : Gets.getPeopleByDirectorshipQuery(directorshipPeopleLogged);
 
     //Cria Stream com essa query
     return StreamBuilder<QuerySnapshot>(

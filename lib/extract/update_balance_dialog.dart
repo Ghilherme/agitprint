@@ -141,10 +141,11 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
           .doc(widget.people.id);
 
       //referencia o fornecedor que for admin (diretoria = ALL)
-      await Gets.getProvidersAdmin('ALL').then((value) {
-        _paymentModel.idProvider =
-            FirebaseFirestore.instance.collection('fornecedores').doc(value.id);
-        _paymentModel.providerName = value.name;
+      await Gets.getProviderByDirectorship('ALL').then((value) {
+        _paymentModel.idProvider = FirebaseFirestore.instance
+            .collection('fornecedores')
+            .doc(value.first.id);
+        _paymentModel.providerName = value.first.name;
       });
 
       Sets.setBalanceTransaction(_paymentModel, false)

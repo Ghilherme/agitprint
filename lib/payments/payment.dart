@@ -62,7 +62,9 @@ class _PaymentBodyState extends State<PaymentBody> {
   }
 
   void _getProviders() async {
-    List<ProvidersModel> providers = await Gets.getProviders();
+    List<ProvidersModel> providers = directorshipPeopleLogged == 'ALL'
+        ? await Gets.getAllActiveProviders()
+        : await Gets.getProviderByDirectorship(directorshipPeopleLogged);
     if (this.mounted) {
       setState(() {
         _itemsDropDown = providers

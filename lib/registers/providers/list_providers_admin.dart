@@ -16,7 +16,9 @@ class ListProvidersAdmin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Query query = Gets.getProvidersQuery();
+    Query query = directorshipPeopleLogged == 'ALL'
+        ? Gets.getAllActiveProvidersQuery()
+        : Gets.getProvidersByDirectorshipQuery(directorshipPeopleLogged);
 
     return Scaffold(
         appBar: AppBar(
