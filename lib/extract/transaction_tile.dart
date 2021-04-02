@@ -3,6 +3,7 @@ import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../constants.dart';
 
 class TransactionTile extends StatefulWidget {
   final PaymentsModel payment;

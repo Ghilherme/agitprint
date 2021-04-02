@@ -1,6 +1,8 @@
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/apis/sets.dart';
 import 'package:agitprint/components/borders.dart';
+import 'package:agitprint/components/colors.dart';
+import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/models/payments.dart';
@@ -95,101 +97,112 @@ class _UpdateBalanceDialogState extends State<UpdateBalanceDialog> {
               ],
             ),
           ),
-          Center(
-              child: _progressBarActive
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        backgroundColor: Colors.white,
-                      ),
-                    )
-                  : ElevatedButton(
-                      child: Text(widget.isAdd ? 'Creditar' : 'Debitar'),
-                      onPressed: () {
-                        updateBalance(_paymentModel);
-                      }))
+          StatefulBuilder(
+              builder: (BuildContext context, StateSetter buttonState) {
+            return Center(
+                child: _progressBarActive
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          backgroundColor: Colors.white,
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 50, right: 50),
+                        child: CustomButton(
+                          title: widget.isAdd ? 'Creditar' : 'Debitar',
+                          elevation: 8,
+                          textStyle:
+                              Theme.of(context).textTheme.subtitle2.copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                          color: AppColors.blue,
+                          height: 40,
+                          onPressed: () async {
+                            if (_form.currentState.validate()) {
+                              buttonState(() {
+                                _progressBarActive = true;
+                              });
+                              await updateBalance(_paymentModel);
+                              buttonState(() {
+                                _progressBarActive = false;
+                              });
+                              Navigator.of(context).pop();
+                            }
+                          },
+                        ),
+                      ));
+          })
         ],
         contentPadding: const EdgeInsets.all(defaultPadding),
       ),
     );
   }
 
-  void updateBalance(PaymentsModel _paymentModel) async {
-    if (_form.currentState.validate()) {
-      setState(() {
-        _progressBarActive = true;
-      });
+  Future<void> updateBalance(PaymentsModel _paymentModel) async {
+    if (_paymentModel.createdAt == null)
+      _paymentModel.createdAt = DateTime.now();
 
-      if (_paymentModel.createdAt == null)
-        _paymentModel.createdAt = DateTime.now();
+    if (_paymentModel.actionDate == null)
+      _paymentModel.actionDate = DateTime.now();
 
-      if (_paymentModel.actionDate == null)
-        _paymentModel.actionDate = DateTime.now();
+    //Solicitação inicia sempre como ativa
+    _paymentModel.status = Status.active;
 
-      //Solicitação inicia sempre como ativa
-      _paymentModel.status = Status.active;
-
-      if (widget.isAdd) {
-        _paymentModel.type = 'Crédito';
-      } else {
-        _paymentModel.type = 'Débito';
-        _paymentModel.amount = -_paymentModel.amount;
-      }
-
-      //referencia id da atual pessoa desse extrato no qual sera feito o pagamento
-      _paymentModel.idPeople = FirebaseFirestore.instance
-          .collection('pessoas')
-          .doc(widget.people.id);
-
-      //referencia o fornecedor que for admin (diretoria = ALL)
-      await Gets.getProviderByDirectorship('ALL').then((value) {
-        _paymentModel.idProvider = FirebaseFirestore.instance
-            .collection('fornecedores')
-            .doc(value.first.id);
-        _paymentModel.providerName = value.first.name;
-      });
-
-      Sets.setBalanceTransaction(_paymentModel, false)
-          .then((value) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text('Saldo atualizado com sucesso.'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-                widget.callback(widget.people.balance + _paymentModel.amount);
-              }))
-          .catchError((error) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text('Falha ao atualizar saldo.'),
-                    content: Text('Erro: ' + error),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-                Navigator.of(context).pop();
-              }));
+    if (widget.isAdd) {
+      _paymentModel.type = 'Crédito';
+    } else {
+      _paymentModel.type = 'Débito';
+      _paymentModel.amount = -_paymentModel.amount;
     }
+
+    //referencia id da atual pessoa desse extrato no qual sera feito o pagamento
+    _paymentModel.idPeople =
+        FirebaseFirestore.instance.collection('pessoas').doc(widget.people.id);
+
+    //referencia o fornecedor que for admin (diretoria = ALL)
+    await Gets.getProviderByDirectorship('ALL', Status.active).then((value) {
+      _paymentModel.idProvider = FirebaseFirestore.instance
+          .collection('fornecedores')
+          .doc(value.first.id);
+      _paymentModel.providerName = value.first.name;
+    });
+
+    await Sets.setBalanceTransaction(_paymentModel, false)
+        .then((value) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Saldo atualizado com sucesso.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ))
+        .catchError((error) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Falha ao atualizar saldo.'),
+                  content: Text('Erro: ' + error),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ))
+        .whenComplete(() =>
+            widget.callback(widget.people.balance + _paymentModel.amount));
   }
 }

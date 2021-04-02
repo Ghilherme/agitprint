@@ -19,8 +19,8 @@ class ListCategoriesAdmin extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Colors.redAccent,
             title: Text("Categorias"),
+            centerTitle: true,
             actions: <Widget>[
               IconButton(
                   icon: const Icon(Icons.add),

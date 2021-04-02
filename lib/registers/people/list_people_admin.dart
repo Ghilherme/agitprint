@@ -1,3 +1,4 @@
+import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/confirmation_dialog.dart';
 import 'package:agitprint/components/list_tile_admin.dart';
 import 'package:agitprint/components/list_view_header.dart';
@@ -15,15 +16,15 @@ class ListPeopleAdmin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Query query = FirebaseFirestore.instance
-        .collection('pessoas')
-        .orderBy('nome')
-        .where('status', isEqualTo: Status.active);
+    Query query = currentPeopleLogged.directorship == 'ALL'
+        ? Gets.getAllActivePeopleQuery()
+        : Gets.getPeopleByDirectorshipQuery(
+            currentPeopleLogged.directorship, Status.active);
 
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Colors.redAccent,
             title: Text("Pessoas"),
+            centerTitle: true,
             actions: <Widget>[
               IconButton(
                   icon: const Icon(Icons.add),
@@ -80,8 +81,6 @@ class ListPeopleAdmin extends StatelessWidget {
 
     index -= 1;
     PeopleModel people = PeopleModel.fromFirestore(snapshot[index]);
-    if (directorshipPeopleLogged != 'ALL' && people.directorship == 'ALL')
-      return Container();
 
     return Column(children: <Widget>[
       ListTileAdmin(

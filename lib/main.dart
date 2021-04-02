@@ -14,11 +14,12 @@ void main() async {
   if (status) {
     idPeopleLogged =
         FirebaseFirestore.instance.doc(prefs.getString('logado_id') ?? '');
-    acessPeopleLogged = prefs.getStringList('logado_acessos') ?? [];
-    directorshipPeopleLogged = prefs.getString('logado_directorship') ?? '';
-    emailPeopleLogged = prefs.getString('logado_email') ?? '';
-    namePeopleLogged = prefs.getString('logado_name') ?? '';
-    avatarPeopleLogger = prefs.getString('logado_avatar') ?? '';
+    currentPeopleLogged.profiles = prefs.getStringList('logado_acessos') ?? [];
+    currentPeopleLogged.directorship =
+        prefs.getString('logado_directorship') ?? '';
+    currentPeopleLogged.email = prefs.getString('logado_email') ?? '';
+    currentPeopleLogged.name = prefs.getString('logado_name') ?? '';
+    currentPeopleLogged.imageAvatar = prefs.getString('logado_avatar') ?? '';
   }
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,

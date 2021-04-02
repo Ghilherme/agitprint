@@ -17,14 +17,15 @@ class CustomDrawer extends StatelessWidget {
       children: [
         UserAccountsDrawerHeader(
             currentAccountPicture: CircleAvatar(
-                radius: 25,
-                backgroundImage: avatarPeopleLogger == '' ||
-                        avatarPeopleLogger == null
-                    ? Image.network(urlAvatarInitials + namePeopleLogged).image
-                    : Image.network(avatarPeopleLogger).image),
-            accountName: Text(namePeopleLogged),
-            accountEmail: Text(emailPeopleLogged)),
-        acessPeopleLogged.contains('admin4')
+                backgroundImage: currentPeopleLogged.imageAvatar == '' ||
+                        currentPeopleLogged.imageAvatar == null
+                    ? Image.network(
+                            urlAvatarInitials + currentPeopleLogged.name)
+                        .image
+                    : Image.network(currentPeopleLogged.imageAvatar).image),
+            accountName: Text(currentPeopleLogged.name),
+            accountEmail: Text(currentPeopleLogged.email)),
+        currentPeopleLogged.profiles.contains('admin4')
             ? ListTile(
                 leading: Icon(Icons.people),
                 title: Text('Pessoas'),
@@ -35,7 +36,7 @@ class CustomDrawer extends StatelessWidget {
                 },
               )
             : Container(),
-        acessPeopleLogged.contains('admin5')
+        currentPeopleLogged.profiles.contains('admin5')
             ? ListTile(
                 leading: Icon(Icons.business),
                 title: Text('Diretorias'),
@@ -45,7 +46,7 @@ class CustomDrawer extends StatelessWidget {
                       builder: (context) => ListDirectorshipAdmin()));
                 })
             : Container(),
-        acessPeopleLogged.contains('user1')
+        currentPeopleLogged.profiles.contains('user1')
             ? ListTile(
                 leading: Icon(Icons.payments),
                 title: Text('Fornecedores'),
@@ -55,7 +56,7 @@ class CustomDrawer extends StatelessWidget {
                       builder: (context) => ListProvidersAdmin()));
                 })
             : Container(),
-        acessPeopleLogged.contains('user2')
+        currentPeopleLogged.profiles.contains('user2')
             ? ListTile(
                 leading: Icon(Icons.category),
                 title: Text('Categorias'),

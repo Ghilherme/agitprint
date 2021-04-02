@@ -62,9 +62,10 @@ class _PaymentBodyState extends State<PaymentBody> {
   }
 
   void _getProviders() async {
-    List<ProvidersModel> providers = directorshipPeopleLogged == 'ALL'
+    List<ProvidersModel> providers = currentPeopleLogged.directorship == 'ALL'
         ? await Gets.getAllActiveProviders()
-        : await Gets.getProviderByDirectorship(directorshipPeopleLogged);
+        : await Gets.getProviderByDirectorship(
+            currentPeopleLogged.directorship, Status.active);
     if (this.mounted) {
       setState(() {
         _itemsDropDown = providers
@@ -266,25 +267,41 @@ class _PaymentBodyState extends State<PaymentBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        Container(
-          width: 180,
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
-          ]),
-          child: CustomButton(
-            title: _progressBarActive == true ? null : "Solicitar",
-            elevation: 8,
-            textStyle: theme.textTheme.subtitle2.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-            color: AppColors.blue,
-            height: 40,
-            onPressed: () {
-              requestPayment();
-            },
-          ),
-        ),
+        StatefulBuilder(
+            builder: (BuildContext context, StateSetter buttonState) {
+          return Container(
+              width: 180,
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
+              ]),
+              child: _progressBarActive
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.white,
+                      ),
+                    )
+                  : CustomButton(
+                      title: "Solicitar",
+                      elevation: 8,
+                      textStyle: theme.textTheme.subtitle2.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      color: AppColors.blue,
+                      height: 40,
+                      onPressed: () async {
+                        if (_form.currentState.validate()) {
+                          buttonState(() {
+                            _progressBarActive = true;
+                          });
+                          await requestPayment();
+                          buttonState(() {
+                            _progressBarActive = false;
+                          });
+                        }
+                      },
+                    ));
+        }),
         SizedBox(
           height: defaultPadding,
         ),
@@ -292,66 +309,54 @@ class _PaymentBodyState extends State<PaymentBody> {
     );
   }
 
-  void requestPayment() async {
-    if (_form.currentState.validate()) {
-      setState(() {
-        _progressBarActive = true;
-      });
+  Future<void> requestPayment() async {
+    if (_paymentModel.createdAt == null)
+      _paymentModel.createdAt = DateTime.now();
 
-      if (_paymentModel.createdAt == null)
-        _paymentModel.createdAt = DateTime.now();
+    if (_paymentModel.actionDate == null)
+      _paymentModel.actionDate = DateTime.now();
 
-      if (_paymentModel.actionDate == null)
-        _paymentModel.actionDate = DateTime.now();
+    //Solicitação inicia sempre como pendente
+    _paymentModel.status = Status.pending;
 
-      //Solicitação inicia sempre como pendente
-      _paymentModel.status = Status.pending;
+    //sempre debito quando passa por essa tela
+    _paymentModel.amount = _paymentModel.amount.isNegative
+        ? _paymentModel.amount
+        : -_paymentModel.amount;
 
-      //sempre debito quando passa por essa tela
-      _paymentModel.amount = _paymentModel.amount.isNegative
-          ? _paymentModel.amount
-          : -_paymentModel.amount;
-
-      Sets.setBalanceTransaction(_paymentModel, true)
-          .then((value) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text('Pagamento solicitado com sucesso.'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-              }))
-          .catchError((error) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text('Falha ao solicitar Pagamento.'),
-                    content: Text('Erro: ' + error),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-              }));
-    }
+    await Sets.setBalanceTransaction(_paymentModel, true)
+        .then((value) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Pagamento solicitado com sucesso.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ))
+        .catchError((error) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Falha ao solicitar Pagamento.'),
+                  content: Text('Erro: ' + error),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ));
   }
 }

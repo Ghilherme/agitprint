@@ -17,8 +17,8 @@ class CategoriesAdmin extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: Colors.redAccent,
           title: Text('Categorias'),
+          centerTitle: true,
           elevation: 0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
@@ -127,25 +127,42 @@ class _CategoriesAdminBodyState extends State<CategoriesAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        Container(
-          width: 180,
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
-          ]),
-          child: CustomButton(
-            title: _progressBarActive == true ? null : "Salvar",
-            elevation: 8,
-            textStyle: theme.textTheme.subtitle2.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-            color: AppColors.blue,
-            height: 40,
-            onPressed: () {
-              saveContact();
-            },
-          ),
-        ),
+        StatefulBuilder(
+            builder: (BuildContext context, StateSetter buttonState) {
+          return Container(
+            width: 180,
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
+            ]),
+            child: _progressBarActive
+                ? Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.white,
+                    ),
+                  )
+                : CustomButton(
+                    title: "Salvar",
+                    elevation: 8,
+                    textStyle: theme.textTheme.subtitle2.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    color: AppColors.blue,
+                    height: 40,
+                    onPressed: () async {
+                      if (_form.currentState.validate()) {
+                        buttonState(() {
+                          _progressBarActive = true;
+                        });
+                        await saveContact();
+                        buttonState(() {
+                          _progressBarActive = false;
+                        });
+                      }
+                    },
+                  ),
+          );
+        }),
         SizedBox(
           height: defaultPadding,
         ),
@@ -153,66 +170,54 @@ class _CategoriesAdminBodyState extends State<CategoriesAdminBody> {
     );
   }
 
-  void saveContact() async {
-    if (_form.currentState.validate()) {
-      setState(() {
-        _progressBarActive = true;
-      });
+  Future<void> saveContact() async {
+    //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
+    DocumentReference refDB = FirebaseFirestore.instance
+        .collection('categorias')
+        .doc(_categoriesModel.id);
 
-      //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
-      DocumentReference contactDB = FirebaseFirestore.instance
-          .collection('categorias')
-          .doc(_categoriesModel.id);
-
-      contactDB
-          .set({
-            'nome': _categoriesModel.name,
-            'descricao': _categoriesModel.description,
-          })
-          .then((value) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: _categoriesModel.id == null
-                        ? Text('Categoria adicionada com sucesso.')
-                        : Text('Categoria atualizada com sucesso.'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-                _categoriesModel.id = contactDB.id;
-              }))
-          .catchError((error) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: _categoriesModel.id == null
-                        ? Text('Falha ao adicionar Categoria.')
-                        : Text('Falha ao atualizar Categoria.'),
-                    content: Text('Erro: ' + error),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-              }));
-    }
+    await refDB
+        .set({
+          'nome': _categoriesModel.name,
+          'descricao': _categoriesModel.description,
+        })
+        .then((value) => showDialog(
+              context: context,
+              builder: (context) {
+                _categoriesModel.id = refDB.id;
+                return AlertDialog(
+                  title: _categoriesModel.id == null
+                      ? Text('Categoria adicionada com sucesso.')
+                      : Text('Categoria atualizada com sucesso.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ))
+        .catchError((error) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: _categoriesModel.id == null
+                      ? Text('Falha ao adicionar Categoria.')
+                      : Text('Falha ao atualizar Categoria.'),
+                  content: Text('Erro: ' + error),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ));
   }
 }

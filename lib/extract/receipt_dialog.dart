@@ -2,6 +2,8 @@ import 'package:agitprint/apis/deletes.dart';
 import 'package:agitprint/apis/updates.dart';
 import 'package:agitprint/apis/uploads.dart';
 import 'package:agitprint/components/borders.dart';
+import 'package:agitprint/components/colors.dart';
+import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/components/image_picker.dart';
@@ -69,25 +71,54 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
             SizedBox(
               height: defaultPadding,
             ),
-            ImagePickerSource(
-              image: _paymentsModel.imageReceipt,
-              callback: callbackImage,
-              imageQuality: 40,
-            ),
+            currentPeopleLogged.profiles.contains('user3')
+                ? ImagePickerSource(
+                    image: _paymentsModel.imageReceipt,
+                    callback: callbackImage,
+                    imageQuality: 40,
+                  )
+                : Container(),
             SizedBox(
               height: defaultPadding,
             ),
-            acessPeopleLogged.contains('admin3')
-                ? Center(
-                    child: _progressBarActive
+            currentPeopleLogged.profiles.contains('user3')
+                ? StatefulBuilder(
+                    builder: (BuildContext context, StateSetter buttonState) {
+                    return _progressBarActive
                         ? Center(
                             child: CircularProgressIndicator(
                               backgroundColor: Colors.white,
                             ),
                           )
-                        : ElevatedButton(
-                            child: Text('Anexar recibo'),
-                            onPressed: attachReceipt))
+                        : Padding(
+                            padding: const EdgeInsets.only(left: 50, right: 50),
+                            child: CustomButton(
+                              title: 'Anexar recibo',
+                              elevation: 8,
+                              textStyle: Theme.of(context)
+                                  .textTheme
+                                  .subtitle2
+                                  .copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              color: AppColors.blue,
+                              height: 40,
+                              onPressed: () async {
+                                if (_form.currentState.validate()) {
+                                  buttonState(() {
+                                    _progressBarActive = true;
+                                  });
+                                  await attachReceipt();
+                                  buttonState(() {
+                                    _progressBarActive = false;
+                                  });
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                          );
+                  })
                 : Container()
           ],
         ));
@@ -99,18 +130,13 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     });
   }
 
-  void attachReceipt() async {
-    setState(() {
-      _progressBarActive = true;
-    });
-
+  Future<void> attachReceipt() async {
     //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
-    DocumentReference paymentDB = FirebaseFirestore.instance
+    DocumentReference refDB = FirebaseFirestore.instance
         .collection('pagamentos')
         .doc(_paymentsModel.id);
 
-    String refPath =
-        'pagamentos/' + paymentDB.id + '/' + paymentDB.id + '_recibo.png';
+    String refPath = 'pagamentos/' + refDB.id + '/' + refDB.id + '_recibo.png';
 
     num _pendingPaymentQtnAdd = 0;
 
@@ -137,7 +163,8 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     //Sempre atualiza data do anexo comprovante
     _paymentsModel.receiptDate = DateTime.now();
 
-    Updates.attachReceiptTransaction(_paymentsModel, _pendingPaymentQtnAdd)
+    await Updates.attachReceiptTransaction(
+            _paymentsModel, _pendingPaymentQtnAdd)
         .then((value) => showDialog(
               context: context,
               builder: (context) {
@@ -154,9 +181,6 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                 );
               },
             ))
-        .then((value) => setState(() {
-              _progressBarActive = false;
-            }))
         .catchError((error) => showDialog(
               context: context,
               builder: (context) {
@@ -173,9 +197,6 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                   ],
                 );
               },
-            ))
-        .then((value) => setState(() {
-              _progressBarActive = false;
-            }));
+            ));
   }
 }

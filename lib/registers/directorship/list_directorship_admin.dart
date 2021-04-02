@@ -19,8 +19,8 @@ class ListDirectorshipAdmin extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Colors.redAccent,
             title: Text("Diretorias"),
+            centerTitle: true,
             actions: <Widget>[
               IconButton(
                   icon: const Icon(Icons.add),

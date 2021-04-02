@@ -8,6 +8,7 @@ import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/home/home_screen.dart';
 import 'package:agitprint/login/custom_clip.dart';
 import 'package:agitprint/models/people.dart';
+import 'package:agitprint/models/status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -155,83 +156,92 @@ class _LoginState extends State<Login> {
             SizedBox(
               height: 8.0,
             ),
-            Container(
-              width: 180,
-              decoration: BoxDecoration(boxShadow: [
-                BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
-              ]),
-              child: _progressBarActive
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        backgroundColor: Colors.white,
+            StatefulBuilder(
+                builder: (BuildContext context, StateSetter buttonState) {
+              return Container(
+                width: 180,
+                decoration: BoxDecoration(boxShadow: [
+                  BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
+                ]),
+                child: _progressBarActive
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          backgroundColor: Colors.white,
+                        ),
+                      )
+                    : CustomButton(
+                        title: "Login",
+                        elevation: 8,
+                        textStyle: theme.textTheme.subtitle2.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        color: AppColors.blue,
+                        height: 40,
+                        onPressed: () async {
+                          if (_form.currentState.validate()) {
+                            buttonState(() {
+                              _progressBarActive = true;
+                            });
+                            await signin();
+                            buttonState(() {
+                              _progressBarActive = false;
+                            });
+                          }
+                        },
                       ),
-                    )
-                  : CustomButton(
-                      title: "Login",
-                      elevation: 8,
-                      textStyle: theme.textTheme.subtitle2.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      color: AppColors.blue,
-                      height: 40,
-                      onPressed: () {
-                        signin();
-                      },
-                    ),
-            )
+              );
+            })
           ],
         ));
   }
 
-  void signin() async {
-    if (_form.currentState.validate()) {
-      setState(() {
-        _progressBarActive = true;
-      });
-      UserCredential userCredential;
+  Future<void> signin() async {
+    UserCredential userCredential;
+    SnackBar snackBar;
 
-      try {
-        userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: _email, password: _password);
-      } on FirebaseAuthException catch (e) {
-        String error = e.message;
-        if (e.code == 'user-not-found') {
-          error = 'Usuário não cadastrado.';
-        } else if (e.code == 'wrong-password') {
-          error = 'Senha incorreta!';
-        }
-        final snackBar = SnackBar(content: Text(error));
+    try {
+      userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: _email, password: _password);
+    } on FirebaseAuthException catch (e) {
+      String error = e.message;
+      if (e.code == 'user-not-found') {
+        error = 'Usuário não cadastrado.';
+      } else if (e.code == 'wrong-password') {
+        error = 'Senha incorreta!';
+      }
+      snackBar = SnackBar(content: Text(error));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+    if (userCredential != null) {
+      PeopleModel people = await Gets.getUserInfo(userCredential.user.email);
+      if (people.status == Status.disabled) {
+        snackBar = SnackBar(content: Text('Usuário desabilitado.'));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        setState(() {
-          _progressBarActive = false;
-        });
+        FirebaseAuth.instance.signOut();
+        return;
       }
-      if (userCredential != null) {
-        final SharedPreferences prefs = await _prefs;
-        prefs.setBool('logado', true);
 
-        //armazena em cache as informacoes do logado
-        PeopleModel people = await Gets.getUserInfo(userCredential.user.email);
-        DocumentReference idPeople =
-            FirebaseFirestore.instance.collection('pessoas').doc(people.id);
-        prefs.setStringList('logado_acessos', List.from(people.profiles));
-        prefs.setString('logado_id', idPeople.path);
-        prefs.setString('logado_directorship', people.directorship);
-        prefs.setString('logado_email', people.email);
-        prefs.setString('logado_name', people.name);
-        prefs.setString('logado_avatar', people.imageAvatar);
-        //coloca na constants para uso em memoria do app
-        acessPeopleLogged = prefs.getStringList('logado_acessos');
-        idPeopleLogged = idPeople;
-        directorshipPeopleLogged = people.directorship;
-        namePeopleLogged = people.name;
-        emailPeopleLogged = people.email;
-        avatarPeopleLogger = people.imageAvatar;
+      final SharedPreferences prefs = await _prefs;
+      prefs.setBool('logado', true);
 
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => HomeScreen()));
-      }
+      //armazena em cache as informacoes do logado
+
+      DocumentReference idPeople =
+          FirebaseFirestore.instance.collection('pessoas').doc(people.id);
+      prefs.setStringList('logado_acessos', List.from(people.profiles));
+      prefs.setString('logado_id', idPeople.path);
+      prefs.setString('logado_directorship', people.directorship);
+      prefs.setString('logado_email', people.email);
+      prefs.setString('logado_name', people.name);
+      prefs.setString('logado_avatar', people.imageAvatar);
+      //coloca na constants para uso em memoria do app
+      currentPeopleLogged.profiles = prefs.getStringList('logado_acessos');
+      idPeopleLogged = idPeople;
+      currentPeopleLogged = PeopleModel.fromPeople(people);
+
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeScreen()));
     }
   }
 }

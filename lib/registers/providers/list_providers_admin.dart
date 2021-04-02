@@ -16,14 +16,15 @@ class ListProvidersAdmin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Query query = directorshipPeopleLogged == 'ALL'
+    Query query = currentPeopleLogged.directorship == 'ALL'
         ? Gets.getAllActiveProvidersQuery()
-        : Gets.getProvidersByDirectorshipQuery(directorshipPeopleLogged);
+        : Gets.getProvidersByDirectorshipQuery(
+            currentPeopleLogged.directorship, Status.active);
 
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Colors.redAccent,
             title: Text("Fornecedores"),
+            centerTitle: true,
             actions: <Widget>[
               IconButton(
                   icon: const Icon(Icons.add),
@@ -80,8 +81,8 @@ class ListProvidersAdmin extends StatelessWidget {
 
     index -= 1;
     ProvidersModel providers = ProvidersModel.fromFirestore(snapshot[index]);
-    if (directorshipPeopleLogged != 'ALL' && providers.directorship == 'ALL')
-      return Container();
+    if (currentPeopleLogged.directorship != 'ALL' &&
+        providers.directorship == 'ALL') return Container();
 
     return Column(children: <Widget>[
       ListTileAdmin(

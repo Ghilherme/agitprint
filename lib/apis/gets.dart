@@ -53,16 +53,20 @@ class Gets {
     return providers;
   }
 
-  static Query getProvidersByDirectorshipQuery(String directorship) {
+  static Query getProvidersByDirectorshipQuery(
+      String directorship, String status) {
     return FirebaseFirestore.instance
         .collection('fornecedores')
-        .where('diretoria', isEqualTo: directorship);
+        .where('diretoria', isEqualTo: directorship)
+        .where('status', isEqualTo: status);
   }
 
   static Future<List<ProvidersModel>> getProviderByDirectorship(
-      String directorship) async {
+      String directorship, String status) async {
     List<ProvidersModel> providers = [];
-    await getProvidersByDirectorshipQuery(directorship).get().then((value) {
+    await getProvidersByDirectorshipQuery(directorship, status)
+        .get()
+        .then((value) {
       value.docs.forEach((element) {
         return providers.add(ProvidersModel.fromFirestore(element));
       });
@@ -80,10 +84,12 @@ class Gets {
         .snapshots();
   }
 
-  static Query getPeopleByDirectorshipQuery(String directorship) {
+  static Query getPeopleByDirectorshipQuery(
+      String directorship, String status) {
     return FirebaseFirestore.instance
         .collection('pessoas')
-        .where('diretoria', isEqualTo: directorship);
+        .where('diretoria', isEqualTo: directorship)
+        .where('status', isEqualTo: status);
   }
 
   static Query getAllActivePeopleQuery() {

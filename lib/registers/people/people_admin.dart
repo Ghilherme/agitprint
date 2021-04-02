@@ -23,9 +23,9 @@ class PeopleAdmin extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: Colors.redAccent,
           title: Text('Administrar Pessoas'),
           elevation: 0,
+          centerTitle: true,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -53,13 +53,13 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
   PeopleModel _peopleModel;
   bool _progressBarActive = false;
   String _fileAvatarUpload = '';
-  List<DropdownMenuItem<String>> _items = [];
+  List<DropdownMenuItem<String>> _itemsDropDown = [];
   String _dropdownDirectorship;
   String _password;
 
   initState() {
     super.initState();
-    getDirectorships();
+    _getDirectorships();
     _peopleModel = PeopleModel.fromPeople(people);
 
     if (_peopleModel.directorship.isNotEmpty) {
@@ -68,6 +68,31 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
 
     if (_peopleModel.lastModification == null)
       _peopleModel.lastModification = DateTime.now();
+  }
+
+  void _getDirectorships() async {
+    List<String> directorships = await Gets.getDirectorships();
+    if (this.mounted) {
+      setState(() {
+        if (currentPeopleLogged.directorship == 'ALL') {
+          _itemsDropDown = directorships
+              .map((dir) => DropdownMenuItem<String>(
+                    child: Text(dir),
+                    value: dir,
+                  ))
+              .toList();
+
+          _itemsDropDown.add(DropdownMenuItem<String>(
+            child: Text('Administrador'),
+            value: 'ALL',
+          ));
+        } else
+          _itemsDropDown.add(DropdownMenuItem<String>(
+            child: Text(currentPeopleLogged.directorship),
+            value: currentPeopleLogged.directorship,
+          ));
+      });
+    }
   }
 
   @override
@@ -171,6 +196,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
                 focusedBorder: Borders.customOutlineInputBorder(
                   color: AppColors.violetShade200,
                 ),
+                hintText: 'Mínimo 6 caracteres',
                 labelStyle: GoogleTextStyles.customTextStyle(),
                 hintTextStyle: GoogleTextStyles.customTextStyle(),
                 textStyle: GoogleTextStyles.customTextStyle(),
@@ -181,44 +207,47 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
                     value.isEmpty ? 'Campo obrigatório' : null,
               )
             : Container(
-                height: 100,
+                height: 60,
                 child: ElevatedButton.icon(
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(
-                          Colors.grey.shade300)),
+                          Colors.grey.shade100)),
                   label: Text(
                     'Resetar senha',
                     style: GoogleTextStyles.customTextStyle(),
                   ),
-                  icon: Icon(Icons.add_a_photo, color: Colors.grey[600]),
+                  icon: Icon(Icons.lock_open, color: Colors.grey[600]),
                   onPressed: () {},
                 ),
               ),
         SizedBox(
           height: defaultPadding,
         ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.0),
-          decoration: BoxDecoration(
-              border: Border.all(color: AppColors.grey),
-              borderRadius: BorderRadius.all(Radius.circular(12))),
-          child: DropdownButton<String>(
-            isExpanded: true,
-            hint: Text('Diretoria'),
-            value: _dropdownDirectorship,
-            icon: Icon(Icons.arrow_downward),
-            iconSize: 24,
-            elevation: 16,
-            onChanged: (String newValue) {
-              _peopleModel.directorship = newValue;
-              setState(() {
-                _dropdownDirectorship = newValue;
-              });
-            },
-            items: _items,
-            style: GoogleTextStyles.customTextStyle(),
-          ),
-        ),
+        StatefulBuilder(
+            builder: (BuildContext context, StateSetter buttonState) {
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            decoration: BoxDecoration(
+                border: Border.all(color: AppColors.grey),
+                borderRadius: BorderRadius.all(Radius.circular(12))),
+            child: DropdownButton<String>(
+              isExpanded: true,
+              hint: Text('Diretoria'),
+              value: _dropdownDirectorship,
+              icon: Icon(Icons.arrow_downward),
+              iconSize: 24,
+              elevation: 16,
+              onChanged: (String newValue) {
+                _peopleModel.directorship = newValue;
+                buttonState(() {
+                  _dropdownDirectorship = newValue;
+                });
+              },
+              items: _itemsDropDown,
+              style: GoogleTextStyles.customTextStyle(),
+            ),
+          );
+        }),
         SizedBox(
           height: defaultPadding,
         ),
@@ -263,25 +292,42 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        Container(
-          width: 180,
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
-          ]),
-          child: CustomButton(
-            title: _progressBarActive == true ? null : "Salvar",
-            elevation: 8,
-            textStyle: theme.textTheme.subtitle2.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-            color: AppColors.blue,
-            height: 40,
-            onPressed: () {
-              savePeople();
-            },
-          ),
-        ),
+        StatefulBuilder(
+            builder: (BuildContext context, StateSetter buttonState) {
+          return Container(
+            width: 180,
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
+            ]),
+            child: _progressBarActive
+                ? Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.white,
+                    ),
+                  )
+                : CustomButton(
+                    title: "Salvar",
+                    elevation: 8,
+                    textStyle: theme.textTheme.subtitle2.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    color: AppColors.blue,
+                    height: 40,
+                    onPressed: () async {
+                      if (_form.currentState.validate()) {
+                        buttonState(() {
+                          _progressBarActive = true;
+                        });
+                        await savePeople();
+                        buttonState(() {
+                          _progressBarActive = false;
+                        });
+                      }
+                    },
+                  ),
+          );
+        }),
         SizedBox(
           height: defaultPadding,
         ),
@@ -295,132 +341,97 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     });
   }
 
-  void savePeople() async {
-    if (_form.currentState.validate()) {
-      setState(() {
-        _progressBarActive = true;
-      });
-
-      try {
-        if (_peopleModel.id == null)
-          UserCredential userCredential = await FirebaseAuth.instance
-              .createUserWithEmailAndPassword(
-                  email: _peopleModel.email, password: _password);
-        else {
-          await FirebaseAuth.instance
-              .sendPasswordResetEmail(email: _peopleModel.email);
-        }
-      } on FirebaseAuthException catch (e) {
-        String error = e.message;
-        if (e.code == 'weak-password') {
-          error = 'Senha fraca. Necessário mínimo de 6 caracteres.';
-        } else if (e.code == 'email-already-in-use') {
-          error = 'Usuário já cadastrado para esse email!';
-        }
-        final snackBar = SnackBar(content: Text(error));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        setState(() {
-          _progressBarActive = false;
-        });
-        return;
+  Future<void> savePeople() async {
+    try {
+      if (_peopleModel.id == null)
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+                email: _peopleModel.email, password: _password);
+      else {
+        await FirebaseAuth.instance
+            .sendPasswordResetEmail(email: _peopleModel.email);
       }
-
-      //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
-      DocumentReference contactDB =
-          FirebaseFirestore.instance.collection('pessoas').doc(_peopleModel.id);
-
-      String refPath =
-          'uploads/' + contactDB.id + '/' + contactDB.id + '_avatar.png';
-
-      //Se houve alteração na imagem, faz um novo upload
-      if (_fileAvatarUpload.isNotEmpty)
-        _peopleModel.imageAvatar =
-            await Uploads.uploadFileImage(refPath, _fileAvatarUpload);
-
-      if (_peopleModel.createdAt == null)
-        _peopleModel.createdAt = DateTime.now();
-
-      _peopleModel.lastModification = DateTime.now();
-
-      //Criado pela area administrativa é sempre ativo
-      _peopleModel.status = Status.active;
-
-      contactDB
-          .set({
-            'nome': _peopleModel.name,
-            'email': _peopleModel.email,
-            'saldo': _peopleModel.balance,
-            'perfil': _peopleModel.profiles,
-            'diretoria': _peopleModel.directorship,
-            'regional': _peopleModel.regionalGroup,
-            'pagamentospendentes': _peopleModel.pendingPayments,
-            'avatar': _peopleModel.imageAvatar,
-            'atualizacao': _peopleModel.lastModification,
-            'criacao': _peopleModel.createdAt,
-            'status': _peopleModel.status,
-          })
-          .then((value) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: _peopleModel.id == null
-                        ? Text('Pessoa adicionada com sucesso.')
-                        : Text('Pessoa atualizada com sucesso.'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-                _peopleModel.id = contactDB.id;
-              }))
-          .catchError((error) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: _peopleModel.id == null
-                        ? Text('Falha ao adicionar Pessoa.')
-                        : Text('Falha ao atualizar Pessoa.'),
-                    content: Text('Erro: ' + error),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-              }));
+    } on FirebaseAuthException catch (e) {
+      String error = e.message;
+      if (e.code == 'weak-password') {
+        error = 'Senha fraca. Necessário mínimo de 6 caracteres.';
+      } else if (e.code == 'email-already-in-use') {
+        error = 'Usuário já cadastrado para esse email!';
+      }
+      final snackBar = SnackBar(content: Text(error));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
     }
-  }
 
-  void getDirectorships() async {
-    List<String> directorships = await Gets.getDirectorships();
-    setState(() {
-      _items = directorships
-          .map((dir) => DropdownMenuItem<String>(
-                child: Text(dir),
-                value: dir,
-              ))
-          .toList();
+    if (_peopleModel.createdAt == null) _peopleModel.createdAt = DateTime.now();
 
-      if (directorshipPeopleLogged == 'ALL')
-        _items.add(DropdownMenuItem<String>(
-          child: Text('Administrador'),
-          value: 'ALL',
-        ));
-    });
+    _peopleModel.lastModification = DateTime.now();
+
+    //Criado pela area administrativa é sempre ativo
+    _peopleModel.status = Status.active;
+
+    //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
+    DocumentReference refDB =
+        FirebaseFirestore.instance.collection('pessoas').doc(_peopleModel.id);
+
+    String refPath = 'uploads/' + refDB.id + '/' + refDB.id + '_avatar.png';
+
+    //Se houve alteração na imagem, faz um novo upload
+    if (_fileAvatarUpload.isNotEmpty)
+      _peopleModel.imageAvatar =
+          await Uploads.uploadFileImage(refPath, _fileAvatarUpload);
+
+    refDB
+        .set({
+          'nome': _peopleModel.name,
+          'email': _peopleModel.email,
+          'saldo': _peopleModel.balance,
+          'perfil': _peopleModel.profiles,
+          'diretoria': _peopleModel.directorship,
+          'regional': _peopleModel.regionalGroup,
+          'pagamentospendentes': _peopleModel.pendingPayments,
+          'avatar': _peopleModel.imageAvatar,
+          'atualizacao': _peopleModel.lastModification,
+          'criacao': _peopleModel.createdAt,
+          'status': _peopleModel.status,
+        })
+        .then((value) => showDialog(
+              context: context,
+              builder: (context) {
+                _peopleModel.id = refDB.id;
+                return AlertDialog(
+                  title: _peopleModel.id == null
+                      ? Text('Pessoa adicionada com sucesso.')
+                      : Text('Pessoa atualizada com sucesso.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ))
+        .catchError((error) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: _peopleModel.id == null
+                      ? Text('Falha ao adicionar Pessoa.')
+                      : Text('Falha ao atualizar Pessoa.'),
+                  content: Text('Erro: ' + error),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ));
   }
 }

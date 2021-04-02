@@ -1,3 +1,4 @@
+import 'package:agitprint/models/people.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
@@ -29,8 +30,4 @@ const List<String> paymentType = const [
 ];
 
 DocumentReference idPeopleLogged;
-List<String> acessPeopleLogged = [];
-String directorshipPeopleLogged;
-String namePeopleLogged;
-String emailPeopleLogged;
-String avatarPeopleLogger;
+PeopleModel currentPeopleLogged;

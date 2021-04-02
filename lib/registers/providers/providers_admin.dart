@@ -28,7 +28,7 @@ class ProvidersAdmin extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: Colors.redAccent,
+          centerTitle: true,
           title: Text('Administrar Fornecedores'),
           elevation: 0,
           leading: IconButton(
@@ -78,17 +78,22 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
     List<String> directorships = await Gets.getDirectorships();
     if (this.mounted) {
       setState(() {
-        _itemsDropDown = directorships
-            .map((dir) => DropdownMenuItem<String>(
-                  child: Text(dir),
-                  value: dir,
-                ))
-            .toList();
+        if (currentPeopleLogged.directorship == 'ALL') {
+          _itemsDropDown = directorships
+              .map((dir) => DropdownMenuItem<String>(
+                    child: Text(dir),
+                    value: dir,
+                  ))
+              .toList();
 
-        if (directorshipPeopleLogged == 'ALL')
           _itemsDropDown.add(DropdownMenuItem<String>(
             child: Text('Administrador'),
             value: 'ALL',
+          ));
+        } else
+          _itemsDropDown.add(DropdownMenuItem<String>(
+            child: Text(currentPeopleLogged.directorship),
+            value: currentPeopleLogged.directorship,
           ));
       });
     }
@@ -127,7 +132,6 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
   }
 
   Widget _buildForm() {
-    ThemeData theme = Theme.of(context);
     return Column(
       children: <Widget>[
         Container(height: 30),
@@ -204,24 +208,27 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
           decoration: BoxDecoration(
               border: Border.all(color: AppColors.grey),
               borderRadius: BorderRadius.all(Radius.circular(12))),
-          child: DropdownButtonFormField<String>(
-            isExpanded: true,
-            hint: Text('Diretoria'),
-            value: _dropdownDirectorship,
-            icon: Icon(Icons.arrow_downward),
-            iconSize: 24,
-            elevation: 16,
-            validator: (value) =>
-                value == null || value.isEmpty ? 'Campo obrigatório' : null,
-            onChanged: (String newValue) {
-              _providersModel.directorship = newValue;
-              setState(() {
-                _dropdownDirectorship = newValue;
-              });
-            },
-            items: _itemsDropDown,
-            style: GoogleTextStyles.customTextStyle(),
-          ),
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter dropDownState) {
+            return DropdownButtonFormField<String>(
+              isExpanded: true,
+              hint: Text('Diretoria'),
+              value: _dropdownDirectorship,
+              icon: Icon(Icons.arrow_downward),
+              iconSize: 24,
+              elevation: 16,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Campo obrigatório' : null,
+              onChanged: (String newValue) {
+                _providersModel.directorship = newValue;
+                dropDownState(() {
+                  _dropdownDirectorship = newValue;
+                });
+              },
+              items: _itemsDropDown,
+              style: GoogleTextStyles.customTextStyle(),
+            );
+          }),
         ),
         SizedBox(
           height: defaultPadding,
@@ -266,25 +273,42 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        Container(
-          width: 180,
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
-          ]),
-          child: CustomButton(
-            title: _progressBarActive == true ? null : "Salvar",
-            elevation: 8,
-            textStyle: theme.textTheme.subtitle2.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-            color: AppColors.blue,
-            height: 40,
-            onPressed: () {
-              saveContact();
-            },
-          ),
-        ),
+        StatefulBuilder(
+            builder: (BuildContext context, StateSetter buttonState) {
+          return Container(
+            width: 180,
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
+            ]),
+            child: _progressBarActive
+                ? Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.white,
+                    ),
+                  )
+                : CustomButton(
+                    title: "Salvar",
+                    elevation: 8,
+                    textStyle: Theme.of(context).textTheme.subtitle2.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                    color: AppColors.blue,
+                    height: 40,
+                    onPressed: () async {
+                      if (_form.currentState.validate()) {
+                        buttonState(() {
+                          _progressBarActive = true;
+                        });
+                        await saveProvider();
+                        buttonState(() {
+                          _progressBarActive = false;
+                        });
+                      }
+                    },
+                  ),
+          );
+        }),
         SizedBox(
           height: defaultPadding,
         ),
@@ -318,99 +342,87 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
     });
   }
 
-  void saveContact() async {
-    if (_form.currentState.validate()) {
-      setState(() {
-        _progressBarActive = true;
+  Future<void> saveProvider() async {
+    if (_providersModel.createdAt == null)
+      _providersModel.createdAt = DateTime.now();
+
+    _providersModel.lastModification = DateTime.now();
+
+    //Criado pela area administrativa é sempre ativo
+    _providersModel.status = Status.active;
+
+    //monta as contas do fornecedor
+    List<dynamic> _bankAccounts = [];
+    _providersModel.banks.forEach((element) {
+      _bankAccounts.add({
+        'codbanco': element.bankCod,
+        'banco': element.bank,
+        'agencia': element.agency,
+        'conta': element.account,
+        'contapoupanca': element.savingAccount,
+        'pix': {
+          'cpf': FieldValidators.removeCaracteres(element.pix['cpf']),
+          'cnpj': FieldValidators.removeCaracteres(element.pix['cnpj']),
+          'telefone': element.pix['telefone'],
+          'email': element.pix['email'],
+        },
       });
+    });
 
-      //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
-      DocumentReference contactDB = FirebaseFirestore.instance
-          .collection('fornecedores')
-          .doc(_providersModel.id);
+    //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
+    DocumentReference refDB = FirebaseFirestore.instance
+        .collection('fornecedores')
+        .doc(_providersModel.id);
 
-      if (_providersModel.createdAt == null)
-        _providersModel.createdAt = DateTime.now();
-
-      _providersModel.lastModification = DateTime.now();
-
-      //Criado pela area administrativa é sempre ativo
-      _providersModel.status = Status.active;
-
-      //monta as contas do fornecedor
-      List<dynamic> _bankAccounts = [];
-      _providersModel.banks.forEach((element) {
-        _bankAccounts.add({
-          'codbanco': element.bankCod,
-          'banco': element.bank,
-          'agencia': element.agency,
-          'conta': element.account,
-          'contapoupanca': element.savingAccount,
-          'pix': {
-            'cpf': FieldValidators.removeCaracteres(element.pix['cpf']),
-            'cnpj': FieldValidators.removeCaracteres(element.pix['cnpj']),
-            'telefone': element.pix['telefone'],
-            'email': element.pix['email'],
-          },
-        });
-      });
-
-      contactDB
-          .set({
-            'nome': _providersModel.name,
-            'cpf': FieldValidators.removeCaracteres(_providersModel.cpf),
-            'cnpj': FieldValidators.removeCaracteres(_providersModel.cnpj),
-            'diretoria': _providersModel.directorship,
-            'categorias': _providersModel.categories,
-            'contas': _bankAccounts,
-            'atualizacao': _providersModel.lastModification,
-            'criacao': _providersModel.createdAt,
-            'status': _providersModel.status,
-          })
-          .then((value) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: _providersModel.id == null
-                        ? Text('Fornecedor adicionado com sucesso.')
-                        : Text('Fornecedor atualizada com sucesso.'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-                _providersModel.id = contactDB.id;
-              }))
-          .catchError((error) => showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: _providersModel.id == null
-                        ? Text('Falha ao adicionar Fornecedor.')
-                        : Text('Falha ao atualizar Fornecedor.'),
-                    content: Text('Erro: ' + error),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ))
-          .then((value) => setState(() {
-                _progressBarActive = false;
-              }));
-    }
+    await refDB
+        .set({
+          'nome': _providersModel.name,
+          'cpf': FieldValidators.removeCaracteres(_providersModel.cpf),
+          'cnpj': FieldValidators.removeCaracteres(_providersModel.cnpj),
+          'diretoria': _providersModel.directorship,
+          'categorias': _providersModel.categories,
+          'contas': _bankAccounts,
+          'atualizacao': _providersModel.lastModification,
+          'criacao': _providersModel.createdAt,
+          'status': _providersModel.status,
+        })
+        .then((value) => showDialog(
+              context: context,
+              builder: (context) {
+                _providersModel.id = refDB.id;
+                return AlertDialog(
+                  title: _providersModel.id == null
+                      ? Text('Fornecedor adicionado com sucesso.')
+                      : Text('Fornecedor atualizado com sucesso.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ))
+        .catchError((error) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: _providersModel.id == null
+                      ? Text('Falha ao adicionar Fornecedor.')
+                      : Text('Falha ao atualizar Fornecedor.'),
+                  content: Text('Erro: ' + error),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ));
   }
 }

@@ -13,7 +13,7 @@ import 'balance_card.dart';
 class Account extends StatefulWidget {
   final PeopleModel people;
 
-  const Account({Key key, this.people}) : super(key: key);
+  const Account({Key key, @required this.people}) : super(key: key);
 
   @override
   _AccountState createState() => _AccountState();
@@ -113,7 +113,7 @@ class _AccountState extends State<Account> {
                                   fontFamily: "Varela"),
                             ),
                           ),
-                          acessPeopleLogged.contains('admin1')
+                          currentPeopleLogged.profiles.contains('admin1')
                               ? IconButton(
                                   icon: Icon(
                                     Icons.add,
@@ -131,7 +131,7 @@ class _AccountState extends State<Account> {
                                   ),
                                 )
                               : Container(),
-                          acessPeopleLogged.contains('admin2')
+                          currentPeopleLogged.profiles.contains('admin2')
                               ? IconButton(
                                   icon: Icon(
                                     Icons.remove_sharp,

@@ -25,10 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
             centerTitle: true,
             title: Text(mainTitleApp),
           ),
-          body: acessPeopleLogged.contains('admin3')
+          body: currentPeopleLogged.profiles.contains('admin3')
               ? BodyHomeListPeople()
               : BodyHome(),
-          floatingActionButton: acessPeopleLogged.contains('user0')
+          floatingActionButton: currentPeopleLogged.profiles.contains('user0')
               ? FloatingActionButton(
                   child: const Icon(Icons.attach_money),
                   onPressed: () {
