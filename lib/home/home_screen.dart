@@ -15,7 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Accounts',
+        title: mainTitleApp,
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
           drawer: CustomDrawer(),
           appBar: AppBar(
             centerTitle: true,
+            elevation: 0,
             title: Text(mainTitleApp),
           ),
           body: currentPeopleLogged.profiles.contains('admin3')

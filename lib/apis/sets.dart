@@ -1,4 +1,6 @@
+import 'package:agitprint/constants.dart';
 import 'package:agitprint/models/payments.dart';
+import 'package:agitprint/models/people.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Sets {
@@ -32,13 +34,14 @@ class Sets {
           .doc(_paymentModel.idPeople.id);
 
       //Get data coleção pessoas
-      DocumentSnapshot people = await ref.get();
+      PeopleModel people = PeopleModel.fromFirestore(await ref.get());
 
-      //atualiza saldo da pessoa e pagamentos pendentes
-      num balance = people.data()['saldo'] + _paymentModel.amount;
+      //atualiza saldo da pessoa, pagamentos pendentes e totais
+      num balance = people.balance + _paymentModel.amount;
       num pendingPayment = isPendingPayment
-          ? people.data()['pagamentospendentes'] + 1
-          : people.data()['pagamentospendentes'];
+          ? people.pendingPayments + 1
+          : people.pendingPayments;
+
       transaction.update(
           ref, {'saldo': balance, 'pagamentospendentes': pendingPayment});
     });

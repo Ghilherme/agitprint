@@ -222,22 +222,14 @@ class _LoginState extends State<Login> {
         return;
       }
 
+      //armazena em cache as informacoes do logado
       final SharedPreferences prefs = await _prefs;
       prefs.setBool('logado', true);
-
-      //armazena em cache as informacoes do logado
-
-      DocumentReference idPeople =
-          FirebaseFirestore.instance.collection('pessoas').doc(people.id);
-      prefs.setStringList('logado_acessos', List.from(people.profiles));
-      prefs.setString('logado_id', idPeople.path);
-      prefs.setString('logado_directorship', people.directorship);
       prefs.setString('logado_email', people.email);
-      prefs.setString('logado_name', people.name);
-      prefs.setString('logado_avatar', people.imageAvatar);
+
       //coloca na constants para uso em memoria do app
-      currentPeopleLogged.profiles = prefs.getStringList('logado_acessos');
-      idPeopleLogged = idPeople;
+      idPeopleLogged =
+          FirebaseFirestore.instance.collection('pessoas').doc(people.id);
       currentPeopleLogged = PeopleModel.fromPeople(people);
 
       Navigator.of(context).pushReplacement(

@@ -1,3 +1,4 @@
+import 'package:agitprint/models/budget_period.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PeopleModel {
@@ -12,11 +13,13 @@ class PeopleModel {
       this.imageAvatar,
       this.createdAt,
       this.lastModification,
+      this.budgetPeriod,
       this.status});
   String id, name, email, directorship, regionalGroup, imageAvatar, status;
   num balance;
   List<dynamic> profiles;
   int pendingPayments;
+  List<BudgetPeriodModel> budgetPeriod;
 
   DateTime lastModification, createdAt;
 
@@ -32,6 +35,7 @@ class PeopleModel {
     this.imageAvatar = people.imageAvatar;
     this.lastModification = people.lastModification;
     this.createdAt = people.createdAt;
+    this.budgetPeriod = people.budgetPeriod;
     this.status = people.status;
   }
   PeopleModel.fromFirestore(QueryDocumentSnapshot snapshot) {
@@ -50,6 +54,7 @@ class PeopleModel {
     this.createdAt = snapshot.data()['criacao'] == null
         ? null
         : snapshot.data()['criacao'].toDate();
+    this.budgetPeriod = getBudgetPeriod(snapshot.data()['orcamentoperiodo']);
     this.status = snapshot.data()['status'];
   }
 
@@ -64,6 +69,18 @@ class PeopleModel {
     this.imageAvatar = '';
     this.lastModification = null;
     this.createdAt = null;
+    this.budgetPeriod = [BudgetPeriodModel.empty()];
     this.status = '';
+  }
+
+  List<BudgetPeriodModel> getBudgetPeriod(Map<dynamic, dynamic> map) {
+    return map.entries
+        .map((entry) => BudgetPeriodModel(
+            period: entry.key,
+            totalWastes: entry.value['totalgastos'],
+            totalActions: entry.value['totalacoes'],
+            totalCategories: entry.value['totalcategorias'],
+            totalEarns: entry.value['totalganhos']))
+        .toList();
   }
 }

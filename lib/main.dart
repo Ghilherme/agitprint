@@ -3,8 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'apis/gets.dart';
 import 'constants.dart';
 import 'login/login.dart';
+import 'models/people.dart';
+import 'models/status.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,14 +15,17 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool status = prefs.getBool('logado') ?? false;
   if (status) {
-    idPeopleLogged =
-        FirebaseFirestore.instance.doc(prefs.getString('logado_id') ?? '');
-    currentPeopleLogged.profiles = prefs.getStringList('logado_acessos') ?? [];
-    currentPeopleLogged.directorship =
-        prefs.getString('logado_directorship') ?? '';
-    currentPeopleLogged.email = prefs.getString('logado_email') ?? '';
-    currentPeopleLogged.name = prefs.getString('logado_name') ?? '';
-    currentPeopleLogged.imageAvatar = prefs.getString('logado_avatar') ?? '';
+    PeopleModel people =
+        await Gets.getUserInfo(prefs.getString('logado_email') ?? '');
+    if (people.status == Status.disabled) {
+      prefs.setBool('logado', false);
+      status = false;
+    } else {
+      //coloca na constants para uso em memoria do app
+      idPeopleLogged =
+          FirebaseFirestore.instance.collection('pessoas').doc(people.id);
+      currentPeopleLogged = PeopleModel.fromPeople(people);
+    }
   }
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
