@@ -60,15 +60,16 @@ class _LoginState extends State<Login> {
                           height: heightOfScreen * 0.1,
                         ),
                         Text(
-                          "Bem-vindo",
+                          "AgitPrint",
                           style: Theme.of(context).textTheme.headline6.copyWith(
                                 fontSize: 20,
+                                fontStyle: FontStyle.italic,
                                 color: AppColors.white,
                               ),
                         ),
                         Text(
                           "Login",
-                          style: Theme.of(context).textTheme.headline4.copyWith(
+                          style: Theme.of(context).textTheme.headline3.copyWith(
                                 color: AppColors.white,
                               ),
                         ),
