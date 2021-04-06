@@ -1,10 +1,11 @@
-import 'package:agitprint/home/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'apis/gets.dart';
 import 'constants.dart';
+import 'home/home_dashboard.dart';
+import 'home/home_list_people.dart';
 import 'login/login.dart';
 import 'models/people.dart';
 import 'models/status.dart';
@@ -33,5 +34,11 @@ void main() async {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: status ? HomeScreen() : Login()));
+      home: status
+          ? currentPeopleLogged.profiles.contains('admin3')
+              ? HomeListPeople()
+              : HomeDashboard(
+                  people: currentPeopleLogged,
+                )
+          : Login()));
 }

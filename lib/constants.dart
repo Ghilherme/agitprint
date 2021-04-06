@@ -12,6 +12,21 @@ const defaultPadding = 20.0;
 const defaultPaddingListView = 5.0;
 const textLightColor = Color(0xFFACACAC);
 
+List<String> months = [
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro'
+];
+
 List<MultiSelectItem> acesses = [
   const MultiSelectItem('admin0', 'Gerenciar acessos'),
   const MultiSelectItem('admin1', 'Creditar saldo'),

@@ -1,12 +1,11 @@
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/components/google_text_styles.dart';
+import 'package:agitprint/home/home_dashboard.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/status.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../extract/accounts.dart';
 import '../constants.dart';
 
@@ -90,7 +89,7 @@ class BodyHomeListPeople extends StatelessWidget {
           ),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => Account(
+                builder: (context) => HomeDashboard(
                       people: people,
                     )));
           }),

@@ -223,11 +223,6 @@ class _AccountState extends State<Account> {
                             color: Colors.grey),
                       ),
                       Spacer(),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
                     ],
                   ),
                 ),

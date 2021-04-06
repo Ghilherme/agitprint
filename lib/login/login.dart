@@ -5,7 +5,8 @@ import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/custom_button.dart';
 import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
-import 'package:agitprint/home/home_screen.dart';
+import 'package:agitprint/home/home_dashboard.dart';
+import 'package:agitprint/home/home_list_people.dart';
 import 'package:agitprint/login/custom_clip.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/status.dart';
@@ -232,8 +233,12 @@ class _LoginState extends State<Login> {
           FirebaseFirestore.instance.collection('pessoas').doc(people.id);
       currentPeopleLogged = PeopleModel.fromPeople(people);
 
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => currentPeopleLogged.profiles.contains('admin3')
+              ? HomeListPeople()
+              : HomeDashboard(
+                  people: currentPeopleLogged,
+                )));
     }
   }
 }
