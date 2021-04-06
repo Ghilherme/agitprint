@@ -346,7 +346,7 @@ class _PaymentBodyState extends State<PaymentBody> {
               builder: (context) {
                 return AlertDialog(
                   title: Text('Falha ao solicitar Pagamento.'),
-                  content: Text('Erro: ' + error),
+                  content: Text('Erro: ' + error.toString()),
                   actions: <Widget>[
                     TextButton(
                       child: Text('Ok'),

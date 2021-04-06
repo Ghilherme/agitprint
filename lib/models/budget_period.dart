@@ -5,23 +5,23 @@ class BudgetPeriodModel {
       {this.period,
       this.totalWastes,
       this.totalEarns,
-      this.totalCategories,
+      this.totalPurchases,
       this.totalActions});
   String period;
-  num totalWastes, totalEarns, totalCategories, totalActions;
+  num totalWastes, totalEarns, totalPurchases, totalActions;
 
   BudgetPeriodModel.fromBudgetPeriod(BudgetPeriodModel budget) {
     this.period = budget.period;
     this.totalWastes = budget.totalWastes;
     this.totalEarns = budget.totalEarns;
-    this.totalCategories = budget.totalCategories;
+    this.totalPurchases = budget.totalPurchases;
     this.totalActions = budget.totalActions;
   }
   BudgetPeriodModel.fromFirestore(QueryDocumentSnapshot snapshot) {
     this.period = '';
     this.totalWastes = snapshot.data()['totalgastos'];
     this.totalEarns = snapshot.data()['totalganhos'];
-    this.totalCategories = snapshot.data()['totalcategorias'];
+    this.totalPurchases = snapshot.data()['totalcompras'];
     this.totalActions = snapshot.data()['totalacoes'];
   }
 
@@ -29,7 +29,7 @@ class BudgetPeriodModel {
     this.period = '';
     this.totalWastes = 0.0;
     this.totalEarns = 0.0;
-    this.totalCategories = 0.0;
+    this.totalPurchases = 0.0;
     this.totalActions = 0.0;
   }
 }

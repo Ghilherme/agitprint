@@ -1,4 +1,5 @@
 import 'package:agitprint/apis/gets.dart';
+import 'package:agitprint/apis/sets.dart';
 import 'package:agitprint/apis/uploads.dart';
 import 'package:agitprint/components/borders.dart';
 import 'package:agitprint/components/colors.dart';
@@ -381,26 +382,14 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
       _peopleModel.imageAvatar =
           await Uploads.uploadFileImage(refPath, _fileAvatarUpload);
 
-    refDB
-        .set({
-          'nome': _peopleModel.name,
-          'email': _peopleModel.email,
-          'saldo': _peopleModel.balance,
-          'perfil': _peopleModel.profiles,
-          'diretoria': _peopleModel.directorship,
-          'regional': _peopleModel.regionalGroup,
-          'pagamentospendentes': _peopleModel.pendingPayments,
-          'avatar': _peopleModel.imageAvatar,
-          'atualizacao': _peopleModel.lastModification,
-          'criacao': _peopleModel.createdAt,
-          'status': _peopleModel.status,
-        })
+    Sets.setPeople(_peopleModel, refDB)
         .then((value) => showDialog(
               context: context,
               builder: (context) {
+                bool isUpdating = _peopleModel.id == null ? true : false;
                 _peopleModel.id = refDB.id;
                 return AlertDialog(
-                  title: _peopleModel.id == null
+                  title: isUpdating
                       ? Text('Pessoa adicionada com sucesso.')
                       : Text('Pessoa atualizada com sucesso.'),
                   actions: <Widget>[
@@ -421,7 +410,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
                   title: _peopleModel.id == null
                       ? Text('Falha ao adicionar Pessoa.')
                       : Text('Falha ao atualizar Pessoa.'),
-                  content: Text('Erro: ' + error),
+                  content: Text('Erro: ' + error.toString()),
                   actions: <Widget>[
                     TextButton(
                       child: Text('Ok'),

@@ -1,3 +1,4 @@
+import 'package:agitprint/constants.dart';
 import 'package:agitprint/models/budget_period.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -57,6 +58,25 @@ class PeopleModel {
     this.budgetPeriod = getBudgetPeriod(snapshot.data()['orcamentoperiodo']);
     this.status = snapshot.data()['status'];
   }
+  PeopleModel.fromFirestoreDocument(DocumentSnapshot snapshot) {
+    this.id = snapshot.id;
+    this.name = snapshot.data()['nome'];
+    this.email = snapshot.data()['email'];
+    this.balance = snapshot.data()['saldo'];
+    this.profiles = snapshot.data()['perfil'];
+    this.directorship = snapshot.data()['diretoria'];
+    this.regionalGroup = snapshot.data()['regional'];
+    this.pendingPayments = snapshot.data()['pagamentospendentes'];
+    this.imageAvatar = snapshot.data()['avatar'];
+    this.lastModification = snapshot.data()['atualizacao'] == null
+        ? null
+        : snapshot.data()['atualizacao'].toDate();
+    this.createdAt = snapshot.data()['criacao'] == null
+        ? null
+        : snapshot.data()['criacao'].toDate();
+    this.budgetPeriod = getBudgetPeriod(snapshot.data()['orcamentoperiodo']);
+    this.status = snapshot.data()['status'];
+  }
 
   PeopleModel.empty() {
     this.name = '';
@@ -69,18 +89,27 @@ class PeopleModel {
     this.imageAvatar = '';
     this.lastModification = null;
     this.createdAt = null;
-    this.budgetPeriod = [BudgetPeriodModel.empty()];
+    this.budgetPeriod = [
+      BudgetPeriodModel(
+          period: currentPeriod,
+          totalActions: 0,
+          totalEarns: 0,
+          totalPurchases: 0,
+          totalWastes: 0)
+    ];
     this.status = '';
   }
 
-  List<BudgetPeriodModel> getBudgetPeriod(Map<dynamic, dynamic> map) {
-    return map.entries
-        .map((entry) => BudgetPeriodModel(
-            period: entry.key,
-            totalWastes: entry.value['totalgastos'],
-            totalActions: entry.value['totalacoes'],
-            totalCategories: entry.value['totalcategorias'],
-            totalEarns: entry.value['totalganhos']))
-        .toList();
+  List<BudgetPeriodModel> getBudgetPeriod(List<dynamic> data) {
+    List<BudgetPeriodModel> budgets = [];
+    data.forEach((value) {
+      budgets.add(BudgetPeriodModel(
+          period: value['periodo'],
+          totalWastes: value['totalgastos'],
+          totalActions: value['totalacoes'],
+          totalPurchases: value['totalcompras'],
+          totalEarns: value['totalganhos']));
+    });
+    return budgets;
   }
 }
