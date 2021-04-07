@@ -215,31 +215,37 @@ class _LoginState extends State<Login> {
       snackBar = SnackBar(content: Text(error));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
-    if (userCredential != null) {
-      PeopleModel people = await Gets.getUserInfo(userCredential.user.email);
-      if (people.status == Status.disabled) {
-        snackBar = SnackBar(content: Text('Usuário desabilitado.'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        FirebaseAuth.instance.signOut();
-        return;
+    try {
+      if (userCredential != null) {
+        PeopleModel people = await Gets.getUserInfo(userCredential.user.email);
+        if (people.status == Status.disabled) {
+          snackBar = SnackBar(content: Text('Usuário desabilitado.'));
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          FirebaseAuth.instance.signOut();
+          return;
+        }
+
+        //armazena em cache as informacoes do logado
+        final SharedPreferences prefs = await _prefs;
+        prefs.setBool('logado', true);
+        prefs.setString('logado_email', people.email);
+
+        //coloca na constants para uso em memoria do app
+        idPeopleLogged =
+            FirebaseFirestore.instance.collection('pessoas').doc(people.id);
+        currentPeopleLogged = PeopleModel.fromPeople(people);
+
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) =>
+                currentPeopleLogged.profiles.contains('admin3')
+                    ? HomeListPeople()
+                    : HomeDashboard(
+                        people: currentPeopleLogged,
+                      )));
       }
-
-      //armazena em cache as informacoes do logado
-      final SharedPreferences prefs = await _prefs;
-      prefs.setBool('logado', true);
-      prefs.setString('logado_email', people.email);
-
-      //coloca na constants para uso em memoria do app
-      idPeopleLogged =
-          FirebaseFirestore.instance.collection('pessoas').doc(people.id);
-      currentPeopleLogged = PeopleModel.fromPeople(people);
-
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => currentPeopleLogged.profiles.contains('admin3')
-              ? HomeListPeople()
-              : HomeDashboard(
-                  people: currentPeopleLogged,
-                )));
+    } on Exception catch (e) {
+      snackBar = SnackBar(content: Text(e.toString()));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 }

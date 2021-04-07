@@ -345,9 +345,8 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
   Future<void> savePeople() async {
     try {
       if (_peopleModel.id == null)
-        UserCredential userCredential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(
-                email: _peopleModel.email, password: _password);
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: _peopleModel.email, password: _password);
       else {
         await FirebaseAuth.instance
             .sendPasswordResetEmail(email: _peopleModel.email);

@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:70478930726:android:2ec4f197b03a3ea641d7e7",
+        "mobilesdk_app_id": "1:70478930726:android:e7fd3944898ff7d741d7e7",
         "android_client_info": {
-          "package_name": "com.br.agitprint"
+          "package_name": "com.br.agitprint.dev"
         }
       },
       "oauth_client": [

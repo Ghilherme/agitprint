@@ -22,9 +22,10 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-apply plugin: 'com.google.gms.google-services'
+
 
  def keystoreProperties = new Properties()
    def keystorePropertiesFile = rootProject.file('key.properties')
@@ -49,11 +50,40 @@ android {
         multiDexEnabled true
     }
 
+    signingConfigs {
+       release {
+           keyAlias keystoreProperties['keyAlias']
+           keyPassword keystoreProperties['keyPassword']
+           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+           storePassword keystoreProperties['storePassword']
+       }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.debug            
+            debuggable true
+        }
+    }
+    //DEV: flutter run --flavor dev
+    //PROD: flutter run --flavor prod
+    
+    flavorDimensions "app"
+
+    productFlavors {
+        prod {
+            dimension "app"
+            resValue "string", "app_name", "AgitPrint"
+        }
+        dev {
+            dimension "app"
+            resValue "string", "app_name", "AgitPrint Dev"
+            applicationIdSuffix ".dev"
         }
     }
 }
