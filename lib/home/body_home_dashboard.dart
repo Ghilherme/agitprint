@@ -23,13 +23,21 @@ class BodyHomeDashboard extends StatefulWidget {
 
 class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
   PeopleModel _peopleModel = PeopleModel.empty();
+
+  @override
+  void initState() {
+    super.initState();
+    _peopleModel = PeopleModel.fromPeople(widget.people);
+  }
+
   @override
   Widget build(BuildContext context) {
     final _media = MediaQuery.of(context).size;
 
-    _peopleModel.budgetPeriod = widget.people.budgetPeriod
+    _peopleModel.budgetPeriod = _peopleModel.budgetPeriod
         .where((element) => element.period == currentPeriod)
         .toList();
+
     BudgetPeriodModel _budget;
     if (_peopleModel.budgetPeriod.isEmpty) {
       _budget = BudgetPeriodModel.empty();
@@ -82,17 +90,26 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
                   style: GoogleTextStyles.customTextStyle(fontSize: 20),
                 ),
               ),
-              IconButton(
-                  icon: Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppColors.blackShade3,
+              Row(
+                children: [
+                  Text(
+                    NumberFormat.simpleCurrency(locale: "pt_BR")
+                        .format(_peopleModel.balance),
+                    style: GoogleTextStyles.customTextStyle(fontSize: 20),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => Account(
-                              people: widget.people,
-                            )));
-                  })
+                  IconButton(
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        color: AppColors.blackShade3,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Account(
+                                  people: _peopleModel,
+                                )));
+                      }),
+                ],
+              )
             ],
           ),
           SizedBox(
@@ -251,9 +268,9 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
               letterSpacing: 0.4,
             ),
           ),
-          vaweCard(context, "Ganhos", _budget.totalEarns, 1,
+          vaweCard(context, "Ganhos", _budget.totalEarns.toDouble(), 1,
               Colors.grey.shade100, Color(0xFF716cff), 100),
-          vaweCard(context, "Gastos", _budget.totalWastes, -1,
+          vaweCard(context, "Gastos", _budget.totalWastes.toDouble(), -1,
               Colors.grey.shade100, Color(0xFFff596b), _totalBudgetPercent),
           SizedBox(
             height: 30,
@@ -261,15 +278,19 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
         ],
       ),
       onRefresh: () {
+        String peopleToRefresh = currentPeopleLogged.id == _peopleModel.id
+            ? currentPeopleLogged.id
+            : _peopleModel.id;
         return FirebaseFirestore.instance
             .collection('pessoas')
-            .doc(currentPeopleLogged.id)
+            .doc(peopleToRefresh)
             .get()
             .then((value) {
           PeopleModel people = PeopleModel.fromFirestoreDocument(value);
           setState(() {
-            currentPeopleLogged.budgetPeriod = people.budgetPeriod;
-            _peopleModel.budgetPeriod = people.budgetPeriod;
+            if (currentPeopleLogged.id == _peopleModel.id)
+              currentPeopleLogged = PeopleModel.fromPeople(people);
+            _peopleModel = PeopleModel.fromPeople(people);
           });
         });
       },

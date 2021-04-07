@@ -27,13 +27,21 @@ List<String> months = [
   'Dezembro'
 ];
 
-List<MultiSelectItem> acesses = [
+List<MultiSelectItem> allAcess = [
   const MultiSelectItem('admin0', 'Gerenciar acessos'),
   const MultiSelectItem('admin1', 'Creditar saldo'),
   const MultiSelectItem('admin2', 'Debitar saldo'),
   const MultiSelectItem('admin3', 'Visualizar lista pessoas'),
   const MultiSelectItem('admin4', 'Gerenciar pessoas'),
   const MultiSelectItem('admin5', 'Gerenciar diretorias'),
+  const MultiSelectItem('user0', 'Solicitar pagamento'),
+  const MultiSelectItem('user1', 'Gerenciar fornecedores'),
+  const MultiSelectItem('user2', 'Gerenciar categorias'),
+  const MultiSelectItem('user3', 'Adicionar comprovantes anexo'),
+];
+List<MultiSelectItem> directorshipAcess = [
+  const MultiSelectItem('admin3', 'Visualizar lista pessoas'),
+  const MultiSelectItem('admin4', 'Gerenciar pessoas'),
   const MultiSelectItem('user0', 'Solicitar pagamento'),
   const MultiSelectItem('user1', 'Gerenciar fornecedores'),
   const MultiSelectItem('user2', 'Gerenciar categorias'),
