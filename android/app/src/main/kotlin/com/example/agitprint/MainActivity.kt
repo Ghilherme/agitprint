@@ -1,4 +1,4 @@
-package com.example.agitprint
+package com.br.agitprint
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "811995647813",
+    "project_id": "agitprint-91873",
+    "storage_bucket": "agitprint-91873.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811995647813:android:af799f399606a3b1dfb82c",
+        "android_client_info": {
+          "package_name": "com.br.agitprint"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "811995647813-59lpqf08hv32ffg86rc9ecgguj7od1t2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPAy9LPWQp-R3qvlMs3GH59B1uorrdM3c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "811995647813-59lpqf08hv32ffg86rc9ecgguj7od1t2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
