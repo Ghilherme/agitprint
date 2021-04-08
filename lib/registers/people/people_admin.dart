@@ -207,19 +207,38 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
                 validator: (value) =>
                     value.isEmpty ? 'Campo obrigatório' : null,
               )
-            : Container(
-                height: 60,
-                child: ElevatedButton.icon(
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Colors.grey.shade100)),
-                  label: Text(
-                    'Resetar senha',
-                    style: GoogleTextStyles.customTextStyle(),
-                  ),
-                  icon: Icon(Icons.lock_open, color: Colors.grey[600]),
-                  onPressed: () {},
-                ),
+            : StatefulBuilder(
+                builder: (BuildContext context, StateSetter resetState) {
+                  return _progressBarActive
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.white,
+                          ),
+                        )
+                      : Container(
+                          height: 60,
+                          child: ElevatedButton.icon(
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.grey.shade100)),
+                            label: Text(
+                              'Resetar senha',
+                              style: GoogleTextStyles.customTextStyle(),
+                            ),
+                            icon:
+                                Icon(Icons.lock_open, color: Colors.grey[600]),
+                            onPressed: () async {
+                              resetState(() {
+                                _progressBarActive = true;
+                              });
+                              await resetPassword(context);
+                              resetState(() {
+                                _progressBarActive = false;
+                              });
+                            },
+                          ));
+                },
               ),
         SizedBox(
           height: defaultPadding,
@@ -278,7 +297,9 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
           ),
           child: MultiSelectDialogField(
               initialValue: _peopleModel.profiles,
-              items: acesses,
+              items: currentPeopleLogged.directorship == 'ALL'
+                  ? allAcess
+                  : directorshipAcess,
               searchHintStyle: GoogleTextStyles.customTextStyle(),
               searchTextStyle: GoogleTextStyles.customTextStyle(),
               itemsTextStyle: GoogleTextStyles.customTextStyle(),
@@ -321,7 +342,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
                           _progressBarActive = true;
                         });
                         await savePeople();
-                        buttonState(() {
+                        setState(() {
                           _progressBarActive = false;
                         });
                       }
@@ -336,6 +357,27 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     );
   }
 
+  Future resetPassword(BuildContext context) async {
+    await FirebaseAuth.instance
+        .sendPasswordResetEmail(email: _peopleModel.email)
+        .then((value) => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Troca de senha enviada para o email.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ));
+  }
+
   callbackAvatar(file) {
     setState(() {
       _fileAvatarUpload = file;
@@ -347,10 +389,8 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
       if (_peopleModel.id == null)
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: _peopleModel.email, password: _password);
-      else {
-        await FirebaseAuth.instance
-            .sendPasswordResetEmail(email: _peopleModel.email);
-      }
+
+      ;
     } on FirebaseAuthException catch (e) {
       String error = e.message;
       if (e.code == 'weak-password') {

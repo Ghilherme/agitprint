@@ -60,7 +60,7 @@ class _LoginState extends State<Login> {
                           height: heightOfScreen * 0.1,
                         ),
                         Text(
-                          "AgitPrint",
+                          "agitprint",
                           style: Theme.of(context).textTheme.headline6.copyWith(
                                 fontSize: 20,
                                 fontStyle: FontStyle.italic,
