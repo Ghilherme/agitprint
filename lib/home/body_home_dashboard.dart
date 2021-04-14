@@ -119,7 +119,7 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "Orçamento",
+                  text: "Verba",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 24,
@@ -187,7 +187,7 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "Gastos",
+                  text: "Distribuição da verba",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 24,
@@ -268,9 +268,9 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
               letterSpacing: 0.4,
             ),
           ),
-          vaweCard(context, "Ganhos", _budget.totalEarns.toDouble(), 1,
+          vaweCard(context, "Créditos", _budget.totalEarns.toDouble(), 1,
               Colors.grey.shade100, Color(0xFF716cff), 100),
-          vaweCard(context, "Gastos", _budget.totalWastes.toDouble(), -1,
+          vaweCard(context, "Débitos", _budget.totalWastes.toDouble(), -1,
               Colors.grey.shade100, Color(0xFFff596b), _totalBudgetPercent),
           SizedBox(
             height: 30,

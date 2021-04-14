@@ -17,8 +17,18 @@ class _HomeDashboardState extends State<HomeDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: CustomDrawer(),
+      drawer: currentPeopleLogged.profiles.contains('admin3')
+          ? null
+          : CustomDrawer(),
       appBar: AppBar(
+        leading: currentPeopleLogged.profiles.contains('admin3')
+            ? IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            : null,
         centerTitle: true,
         elevation: 0,
         title: Text(mainTitleApp),
