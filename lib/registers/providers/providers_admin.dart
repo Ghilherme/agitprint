@@ -389,9 +389,10 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
         .then((value) => showDialog(
               context: context,
               builder: (context) {
+                bool isUpdating = _providersModel.id == null ? true : false;
                 _providersModel.id = refDB.id;
                 return AlertDialog(
-                  title: _providersModel.id == null
+                  title: isUpdating
                       ? Text('Fornecedor adicionado com sucesso.')
                       : Text('Fornecedor atualizado com sucesso.'),
                   actions: <Widget>[

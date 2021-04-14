@@ -53,12 +53,14 @@ class _PaymentBodyState extends State<PaymentBody> {
   List<DropdownMenuItem<ProvidersModel>> _itemsDropDown = [];
   String _dropdownType;
   PaymentsModel _paymentModel;
+  DateTime _selectedDate = DateTime.now();
 
   initState() {
     super.initState();
     _getProviders();
     _paymentModel = PaymentsModel.empty();
     _paymentModel.idPeople = idPeopleLogged;
+    _paymentModel.actionDate = _selectedDate;
   }
 
   void _getProviders() async {
@@ -89,6 +91,19 @@ class _PaymentBodyState extends State<PaymentBody> {
     if (provider.categories.first.isNotEmpty)
       strBuild += ' (' + provider.categories.first + ')';
     return strBuild;
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: _selectedDate,
+        firstDate: DateTime(2015, 8),
+        lastDate: DateTime(2101));
+    if (picked != null && picked != _selectedDate)
+      setState(() {
+        _paymentModel.actionDate = picked;
+        _selectedDate = picked;
+      });
   }
 
   @override
@@ -216,7 +231,7 @@ class _PaymentBodyState extends State<PaymentBody> {
         CustomTextFormField(
             textInputType: TextInputType.text,
             textCapitalization: TextCapitalization.sentences,
-            labelText: "Descrição",
+            labelText: "Descrição da ação/compra",
             initialValue: '',
             border: Borders.customOutlineInputBorder(),
             enabledBorder: Borders.customOutlineInputBorder(),
@@ -229,6 +244,14 @@ class _PaymentBodyState extends State<PaymentBody> {
             onChanged: (value) {
               _paymentModel.description = value.trim();
             }),
+        SizedBox(
+          height: defaultPadding,
+        ),
+        ElevatedButton(
+          onPressed: () => _selectDate(context),
+          child: Text('Data da ação:   ' +
+              "${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year.toString()}"),
+        ),
         SizedBox(
           height: defaultPadding,
         ),
@@ -312,9 +335,6 @@ class _PaymentBodyState extends State<PaymentBody> {
   Future<void> requestPayment() async {
     if (_paymentModel.createdAt == null)
       _paymentModel.createdAt = DateTime.now();
-
-    if (_paymentModel.actionDate == null)
-      _paymentModel.actionDate = DateTime.now();
 
     //Solicitação inicia sempre como pendente
     _paymentModel.status = Status.pending;

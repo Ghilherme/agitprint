@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 
-const String mainTitleApp = 'Agit Print';
+const String mainTitleApp = 'AgitPrint';
 
 const String urlAvatarInitials =
     'https://ui-avatars.com/api/?background=random&name=';
@@ -48,8 +48,8 @@ List<MultiSelectItem> directorshipAcess = [
   const MultiSelectItem('user3', 'Adicionar comprovantes anexo'),
 ];
 const List<String> paymentType = const [
-  'Compras',
-  'Ação',
+  'Compras materiais diversos',
+  'Ações em loja',
 ];
 
 String currentPeriod = DateTime.now().month.toString().padLeft(2, '0') +

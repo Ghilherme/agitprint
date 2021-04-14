@@ -120,9 +120,6 @@ class _CategoriesAdminBodyState extends State<CategoriesAdminBody> {
             textStyle: GoogleTextStyles.customTextStyle(),
             onChanged: (value) {
               _categoriesModel.description = value.trim();
-            },
-            validator: (value) {
-              return value.isEmpty ? 'Campo obrigatório' : null;
             }),
         SizedBox(
           height: defaultPadding,
@@ -184,9 +181,10 @@ class _CategoriesAdminBodyState extends State<CategoriesAdminBody> {
         .then((value) => showDialog(
               context: context,
               builder: (context) {
+                bool isUpdating = _categoriesModel.id == null ? true : false;
                 _categoriesModel.id = refDB.id;
                 return AlertDialog(
-                  title: _categoriesModel.id == null
+                  title: isUpdating
                       ? Text('Categoria adicionada com sucesso.')
                       : Text('Categoria atualizada com sucesso.'),
                   actions: <Widget>[
@@ -207,7 +205,7 @@ class _CategoriesAdminBodyState extends State<CategoriesAdminBody> {
                   title: _categoriesModel.id == null
                       ? Text('Falha ao adicionar Categoria.')
                       : Text('Falha ao atualizar Categoria.'),
-                  content: Text('Erro: ' + error),
+                  content: Text('Erro: ' + error.toString()),
                   actions: <Widget>[
                     TextButton(
                       child: Text('Ok'),

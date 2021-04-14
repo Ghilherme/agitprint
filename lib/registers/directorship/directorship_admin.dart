@@ -172,11 +172,11 @@ class _DirectorshipAdminBodyState extends State<DirectorshipAdminBody> {
 
   Future<void> saveContact() async {
     //referencia o doc e se tiver ID atualiza, se nao cria um ID novo
-    DocumentReference contactDB = FirebaseFirestore.instance
+    DocumentReference refDB = FirebaseFirestore.instance
         .collection('diretorias')
         .doc(_directoriesModel.id);
 
-    await contactDB
+    await refDB
         .set({
           'nome': _directoriesModel.name,
           'descricao': _directoriesModel.description,
@@ -184,9 +184,10 @@ class _DirectorshipAdminBodyState extends State<DirectorshipAdminBody> {
         .then((value) => showDialog(
               context: context,
               builder: (context) {
-                _directoriesModel.id = contactDB.id;
+                bool isUpdating = _directoriesModel.id == null ? true : false;
+                _directoriesModel.id = refDB.id;
                 return AlertDialog(
-                  title: _directoriesModel.id == null
+                  title: isUpdating
                       ? Text('Diretoria adicionada com sucesso.')
                       : Text('Diretoria atualizada com sucesso.'),
                   actions: <Widget>[
