@@ -61,6 +61,12 @@ class Gets {
         .where('status', isEqualTo: status);
   }
 
+  static Future<ProvidersModel> getProvidersById(
+      DocumentReference idProvider) async {
+    DocumentSnapshot doc = await idProvider.get();
+    return ProvidersModel.fromFirestoreDocument(doc);
+  }
+
   static Future<List<ProvidersModel>> getProviderByDirectorship(
       String directorship, String status) async {
     List<ProvidersModel> providers = [];

@@ -304,9 +304,11 @@ class _PaymentBodyState extends State<PaymentBody> {
                 ),
               )
             : Container(),
-        SizedBox(
-          height: defaultPadding,
-        ),
+        currentPeopleLogged.directorship == 'ALL'
+            ? SizedBox(
+                height: defaultPadding,
+              )
+            : Container(),
         CustomTextFormField(
           textInputType: TextInputType.number,
           textCapitalization: TextCapitalization.none,

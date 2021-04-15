@@ -7,7 +7,6 @@ import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'balance_card.dart';
 
 class Account extends StatefulWidget {
