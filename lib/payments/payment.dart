@@ -9,6 +9,7 @@ import 'package:agitprint/components/custom_text_form_field.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/components/field_validators.dart';
 import 'package:agitprint/models/payments.dart';
+import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
 import 'package:brasil_fields/brasil_fields.dart';
@@ -50,7 +51,9 @@ class _PaymentBodyState extends State<PaymentBody> {
   final _form = GlobalKey<FormState>();
   bool _progressBarActive = false;
   ProvidersModel _dropdownProvider;
-  List<DropdownMenuItem<ProvidersModel>> _itemsDropDown = [];
+  List<DropdownMenuItem<ProvidersModel>> _itemsDropDownProvider = [];
+  PeopleModel _dropdownPeople;
+  List<DropdownMenuItem<PeopleModel>> _itemsDropDownPeople = [];
   String _dropdownType;
   PaymentsModel _paymentModel;
   DateTime _selectedDate = DateTime.now();
@@ -61,6 +64,7 @@ class _PaymentBodyState extends State<PaymentBody> {
     _paymentModel = PaymentsModel.empty();
     _paymentModel.idPeople = idPeopleLogged;
     _paymentModel.actionDate = _selectedDate;
+    if (currentPeopleLogged.directorship == 'ALL') _getPeople();
   }
 
   void _getProviders() async {
@@ -70,9 +74,23 @@ class _PaymentBodyState extends State<PaymentBody> {
             currentPeopleLogged.directorship, Status.active);
     if (this.mounted) {
       setState(() {
-        _itemsDropDown = providers
+        _itemsDropDownProvider = providers
             .map((val) => DropdownMenuItem<ProvidersModel>(
                   child: Text(displayProvider(val)),
+                  value: val,
+                ))
+            .toList();
+      });
+    }
+  }
+
+  void _getPeople() async {
+    List<PeopleModel> people = await Gets.getAllActivePeople();
+    if (this.mounted) {
+      setState(() {
+        _itemsDropDownPeople = people
+            .map((val) => DropdownMenuItem<PeopleModel>(
+                  child: Text(val.name + ' - ' + val.directorship),
                   value: val,
                 ))
             .toList();
@@ -90,6 +108,9 @@ class _PaymentBodyState extends State<PaymentBody> {
 
     if (provider.categories.first.isNotEmpty)
       strBuild += ' (' + provider.categories.first + ')';
+
+    if (currentPeopleLogged.directorship == 'ALL')
+      strBuild += ' - ' + provider.directorship;
     return strBuild;
   }
 
@@ -156,7 +177,7 @@ class _PaymentBodyState extends State<PaymentBody> {
               });
             },
             validator: (value) => value == null ? 'Campo obrigatório' : null,
-            items: _itemsDropDown,
+            items: _itemsDropDownProvider,
             style: GoogleTextStyles.customTextStyle(),
           ),
         ),
@@ -252,6 +273,37 @@ class _PaymentBodyState extends State<PaymentBody> {
           child: Text('Data da ação:   ' +
               "${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year.toString()}"),
         ),
+        SizedBox(
+          height: defaultPadding,
+        ),
+        currentPeopleLogged.directorship == 'ALL'
+            ? Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.grey),
+                    borderRadius: BorderRadius.all(Radius.circular(12))),
+                child: DropdownButtonFormField<PeopleModel>(
+                  isExpanded: true,
+                  itemHeight: 70,
+                  hint: Text('Pessoa'),
+                  value: _dropdownPeople,
+                  icon: Icon(Icons.arrow_downward),
+                  iconSize: 24,
+                  onChanged: (PeopleModel newValue) {
+                    _paymentModel.idPeople = FirebaseFirestore.instance
+                        .collection('pessoas')
+                        .doc(newValue.id);
+                    setState(() {
+                      _dropdownPeople = newValue;
+                    });
+                  },
+                  validator: (value) =>
+                      value == null ? 'Campo obrigatório' : null,
+                  items: _itemsDropDownPeople,
+                  style: GoogleTextStyles.customTextStyle(),
+                ),
+              )
+            : Container(),
         SizedBox(
           height: defaultPadding,
         ),

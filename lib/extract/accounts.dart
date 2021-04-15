@@ -107,10 +107,10 @@ class _AccountState extends State<Account> {
                             child: Text(
                               "Extrato",
                               style: TextStyle(
-                                  fontSize: _media.longestSide <= 775 ? 35 : 40,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: "Varela"),
+                                fontSize: _media.longestSide <= 775 ? 35 : 40,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           currentPeopleLogged.profiles.contains('admin1')

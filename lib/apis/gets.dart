@@ -99,6 +99,16 @@ class Gets {
         .where('status', isEqualTo: Status.active);
   }
 
+  static Future<List<PeopleModel>> getAllActivePeople() async {
+    List<PeopleModel> people = [];
+    await getAllActivePeopleQuery().get().then((value) {
+      value.docs.forEach((element) {
+        return people.add(PeopleModel.fromFirestore(element));
+      });
+    });
+    return people;
+  }
+
   static Stream<DocumentSnapshot> getPeopleStream(String idPeople) {
     return FirebaseFirestore.instance
         .collection('pessoas')

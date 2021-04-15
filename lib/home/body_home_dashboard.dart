@@ -86,11 +86,11 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  "Bem-vindo, \n" + widget.people.name,
+                  "Olá, " + widget.people.name,
                   style: GoogleTextStyles.customTextStyle(fontSize: 20),
                 ),
               ),
-              Row(
+              /* Row(
                 children: [
                   Text(
                     NumberFormat.simpleCurrency(locale: "pt_BR")
@@ -109,8 +109,74 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
                                 )));
                       }),
                 ],
-              )
+              ) */
             ],
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "Saldo",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 10.0,
+            ),
+            child: Card(
+              elevation: 0,
+              clipBehavior: Clip.antiAlias,
+              margin: EdgeInsets.only(
+                right: 20,
+              ),
+              child: Column(
+                children: <Widget>[
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => Account(
+                                people: _peopleModel,
+                              )));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            NumberFormat.simpleCurrency(locale: "pt_BR")
+                                .format(_peopleModel.balance),
+                            style: GoogleTextStyles.customTextStyle(
+                                color: _peopleModel.balance.isNegative
+                                    ? Colors.red
+                                    : Colors.green,
+                                fontSize: 21,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: AppColors.blackShade3,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           SizedBox(
             height: 30,
@@ -135,7 +201,6 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
                     color: Colors.grey.shade400,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
-                    fontFamily: "Varela",
                   ),
                 ),
               ],
@@ -147,7 +212,7 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
               right: 20,
             ),
             padding: EdgeInsets.all(10),
-            height: screenAwareSize(45, context),
+            height: screenAwareSize(50, context),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(6),
