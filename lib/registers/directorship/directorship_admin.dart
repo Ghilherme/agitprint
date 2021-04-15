@@ -79,9 +79,8 @@ class _DirectorshipAdminBodyState extends State<DirectorshipAdminBody> {
     ThemeData theme = Theme.of(context);
     return Column(
       children: <Widget>[
-        Container(height: 30),
         SizedBox(
-          height: defaultPadding,
+          height: 30,
         ),
         CustomTextFormField(
           textInputType: TextInputType.text,

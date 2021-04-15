@@ -134,6 +134,9 @@ class _ProvidersAdminBodyState extends State<ProvidersAdminBody> {
   Widget _buildForm() {
     return Column(
       children: <Widget>[
+        SizedBox(
+          height: 30,
+        ),
         CustomTextFormField(
           textInputType: TextInputType.text,
           textCapitalization: TextCapitalization.words,
