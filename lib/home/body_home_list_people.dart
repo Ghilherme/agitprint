@@ -1,4 +1,5 @@
 import 'package:agitprint/apis/gets.dart';
+import 'package:agitprint/components/colors.dart';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/home/home_dashboard.dart';
 import 'package:agitprint/models/people.dart';
@@ -62,26 +63,28 @@ class BodyHomeListPeople extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                width: 20,
-                height: 20,
+                width: 23,
+                height: 23,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30)),
-                  color:
-                      people.pendingPayments == 0 ? Colors.grey : Colors.green,
+                  color: people.pendingPayments == 0
+                      ? Colors.grey
+                      : Color(0xFFffd60f),
                 ),
                 child: Center(
                     child: Text(
                   people.pendingPayments.toString(),
                   style: GoogleTextStyles.customTextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w300),
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 )),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 10),
+                padding: const EdgeInsets.only(top: 5, bottom: 10),
                 child: Text(
                     NumberFormat.simpleCurrency(locale: "pt_BR")
                         .format(people.balance),
                     style: GoogleTextStyles.customTextStyle(
+                        color: AppColors.blackShade3,
                         fontWeight: FontWeight.bold)),
               ),
             ],

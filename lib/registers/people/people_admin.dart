@@ -121,7 +121,9 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     ThemeData theme = Theme.of(context);
     return Column(
       children: <Widget>[
-        Container(height: 30),
+        SizedBox(
+          height: 30,
+        ),
         Center(
           child: ImagePickerSource(
             image: _peopleModel.imageAvatar,
@@ -389,8 +391,6 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
       if (_peopleModel.id == null)
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: _peopleModel.email, password: _password);
-
-      ;
     } on FirebaseAuthException catch (e) {
       String error = e.message;
       if (e.code == 'weak-password') {

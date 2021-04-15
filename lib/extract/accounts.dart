@@ -7,7 +7,6 @@ import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'balance_card.dart';
 
 class Account extends StatefulWidget {
@@ -107,10 +106,10 @@ class _AccountState extends State<Account> {
                             child: Text(
                               "Extrato",
                               style: TextStyle(
-                                  fontSize: _media.longestSide <= 775 ? 35 : 40,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: "Varela"),
+                                fontSize: _media.longestSide <= 775 ? 35 : 40,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           currentPeopleLogged.profiles.contains('admin1')

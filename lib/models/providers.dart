@@ -47,6 +47,23 @@ class ProvidersModel {
     this.status = snapshot.data()['status'];
   }
 
+  ProvidersModel.fromFirestoreDocument(DocumentSnapshot snapshot) {
+    this.id = snapshot.id;
+    this.name = snapshot.data()['nome'];
+    this.cpf = snapshot.data()['cpf'];
+    this.cnpj = snapshot.data()['cnpj'];
+    this.directorship = snapshot.data()['diretoria'];
+    this.categories = snapshot.data()['categorias'];
+    this.banks = getAccounts(snapshot.data()['contas']);
+    this.lastModification = snapshot.data()['atualizacao'] == null
+        ? null
+        : snapshot.data()['atualizacao'].toDate();
+    this.createdAt = snapshot.data()['criacao'] == null
+        ? null
+        : snapshot.data()['criacao'].toDate();
+    this.status = snapshot.data()['status'];
+  }
+
   ProvidersModel.empty() {
     this.name = '';
     this.cpf = '';

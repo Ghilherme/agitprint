@@ -61,6 +61,12 @@ class Gets {
         .where('status', isEqualTo: status);
   }
 
+  static Future<ProvidersModel> getProvidersById(
+      DocumentReference idProvider) async {
+    DocumentSnapshot doc = await idProvider.get();
+    return ProvidersModel.fromFirestoreDocument(doc);
+  }
+
   static Future<List<ProvidersModel>> getProviderByDirectorship(
       String directorship, String status) async {
     List<ProvidersModel> providers = [];
@@ -97,6 +103,16 @@ class Gets {
         .collection('pessoas')
         .orderBy('nome')
         .where('status', isEqualTo: Status.active);
+  }
+
+  static Future<List<PeopleModel>> getAllActivePeople() async {
+    List<PeopleModel> people = [];
+    await getAllActivePeopleQuery().get().then((value) {
+      value.docs.forEach((element) {
+        return people.add(PeopleModel.fromFirestore(element));
+      });
+    });
+    return people;
   }
 
   static Stream<DocumentSnapshot> getPeopleStream(String idPeople) {

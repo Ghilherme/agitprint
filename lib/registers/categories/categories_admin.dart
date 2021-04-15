@@ -79,9 +79,8 @@ class _CategoriesAdminBodyState extends State<CategoriesAdminBody> {
     ThemeData theme = Theme.of(context);
     return Column(
       children: <Widget>[
-        Container(height: 30),
         SizedBox(
-          height: defaultPadding,
+          height: 30,
         ),
         CustomTextFormField(
           textInputType: TextInputType.text,
