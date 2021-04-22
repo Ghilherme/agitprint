@@ -78,15 +78,15 @@ class BodyHomeListPeople extends StatelessWidget {
                       color: Colors.white, fontWeight: FontWeight.w500),
                 )),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 5, bottom: 10),
-                child: Text(
-                    NumberFormat.simpleCurrency(locale: "pt_BR")
-                        .format(people.balance),
-                    style: GoogleTextStyles.customTextStyle(
-                        color: AppColors.blackShade3,
-                        fontWeight: FontWeight.bold)),
+              SizedBox(
+                height: 5,
               ),
+              Text(
+                  NumberFormat.simpleCurrency(locale: "pt_BR")
+                      .format(people.balance),
+                  style: GoogleTextStyles.customTextStyle(
+                      color: AppColors.blackShade3,
+                      fontWeight: FontWeight.bold)),
             ],
           ),
           onTap: () {

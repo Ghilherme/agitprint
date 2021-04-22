@@ -225,9 +225,7 @@ class _BodyHomeDashboardState extends State<BodyHomeDashboard> {
               ],
             ),
             child: LinearPercentIndicator(
-              width: screenAwareSize(
-                  _media.width - (_media.longestSide <= 775 ? 100 : 160),
-                  context),
+              width: _media.width - 100,
               lineHeight: 20.0,
               percent: (_totalBudgetPercent / 100) > 1
                   ? 1
