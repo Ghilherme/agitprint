@@ -102,7 +102,8 @@ class _HomeDashboardState extends State<HomeDashboard> {
     }
 
     var fileName = widget.people.name + "_Relatorio.xlsx";
-    var fileBytes = excel.save();
+    var fileBytes =
+        Platform.isWindows ? excel.save(fileName: fileName) : excel.save();
 
     var directory = await getApplicationDocumentsDirectory();
 
