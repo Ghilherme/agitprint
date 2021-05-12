@@ -255,7 +255,7 @@ class _AccountState extends State<Account> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     StreamBuilder<QuerySnapshot>(
-                      stream: Gets.getPaymentsStream(widget.people.id),
+                      stream: Gets.getPaymentsStreamByPeople(widget.people.id),
                       builder: (context, snapshot) {
                         //Trata Load
                         if (snapshot.connectionState ==
