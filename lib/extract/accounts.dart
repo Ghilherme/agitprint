@@ -164,18 +164,23 @@ class _AccountState extends State<Account> {
                         ? _media.height / 4
                         : _media.height / 4.3,
                     width: _media.width,
-                    child: ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      padding: EdgeInsets.only(bottom: 10),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 1,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: BalanceCard(people: widget.people),
-                        );
-                      },
+                    child: Center(
+                      child: ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        padding: EdgeInsets.only(bottom: 10),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 1,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: Container(
+                                constraints: BoxConstraints(
+                                    minWidth: 100, maxWidth: 500),
+                                child: BalanceCard(people: widget.people)),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

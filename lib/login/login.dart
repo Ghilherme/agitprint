@@ -103,54 +103,61 @@ class _LoginState extends State<Login> {
         key: _form,
         child: Column(
           children: <Widget>[
-            CustomTextFormField(
-                textInputType: TextInputType.emailAddress,
-                textCapitalization: TextCapitalization.none,
-                labelText: "Email",
-                border: Borders.customOutlineInputBorder(),
-                enabledBorder: Borders.customOutlineInputBorder(),
-                focusedBorder: Borders.customOutlineInputBorder(
-                  color: const Color(0xFF655796),
-                ),
-                onChanged: (val) {
-                  _email = val.trim();
-                },
-                labelStyle: GoogleTextStyles.customTextStyle(),
-                hintTextStyle: GoogleTextStyles.customTextStyle(),
-                textStyle: GoogleTextStyles.customTextStyle(),
-                validator: (value) {
-                  return value.isEmpty
-                      ? 'Campo obrigatório'
-                      : RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                              .hasMatch(value)
-                          ? null
-                          : 'Email inválido';
-                }),
+            Container(
+              constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
+              child: CustomTextFormField(
+                  textInputType: TextInputType.emailAddress,
+                  textCapitalization: TextCapitalization.none,
+                  labelText: "Email",
+                  border: Borders.customOutlineInputBorder(),
+                  enabledBorder: Borders.customOutlineInputBorder(),
+                  focusedBorder: Borders.customOutlineInputBorder(
+                    color: const Color(0xFF655796),
+                  ),
+                  onChanged: (val) {
+                    _email = val.trim();
+                  },
+                  labelStyle: GoogleTextStyles.customTextStyle(),
+                  hintTextStyle: GoogleTextStyles.customTextStyle(),
+                  textStyle: GoogleTextStyles.customTextStyle(),
+                  validator: (value) {
+                    return value.isEmpty
+                        ? 'Campo obrigatório'
+                        : RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                .hasMatch(value)
+                            ? null
+                            : 'Email inválido';
+                  }),
+            ),
             SizedBox(
               height: 20.0,
             ),
-            CustomTextFormField(
-              textInputType: TextInputType.text,
-              textCapitalization: TextCapitalization.none,
-              labelText: "Senha",
-              obscured: true,
-              hasSuffixIcon: true,
-              suffixIcon: Icon(
-                Icons.lock,
-                color: AppColors.blackShade10,
+            Container(
+              constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
+              child: CustomTextFormField(
+                textInputType: TextInputType.text,
+                textCapitalization: TextCapitalization.none,
+                labelText: "Senha",
+                obscured: true,
+                hasSuffixIcon: true,
+                suffixIcon: Icon(
+                  Icons.lock,
+                  color: AppColors.blackShade10,
+                ),
+                onChanged: (val) {
+                  _password = val;
+                },
+                border: Borders.customOutlineInputBorder(),
+                enabledBorder: Borders.customOutlineInputBorder(),
+                focusedBorder: Borders.customOutlineInputBorder(
+                  color: AppColors.violetShade200,
+                ),
+                labelStyle: GoogleTextStyles.customTextStyle(),
+                hintTextStyle: GoogleTextStyles.customTextStyle(),
+                textStyle: GoogleTextStyles.customTextStyle(),
+                validator: (value) =>
+                    value.isEmpty ? 'Senha obrigatório' : null,
               ),
-              onChanged: (val) {
-                _password = val;
-              },
-              border: Borders.customOutlineInputBorder(),
-              enabledBorder: Borders.customOutlineInputBorder(),
-              focusedBorder: Borders.customOutlineInputBorder(
-                color: AppColors.violetShade200,
-              ),
-              labelStyle: GoogleTextStyles.customTextStyle(),
-              hintTextStyle: GoogleTextStyles.customTextStyle(),
-              textStyle: GoogleTextStyles.customTextStyle(),
-              validator: (value) => value.isEmpty ? 'Senha obrigatório' : null,
             ),
             SizedBox(
               height: 12.0,

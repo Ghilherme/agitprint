@@ -138,9 +138,11 @@ class _PaymentBodyState extends State<PaymentBody> {
             SizedBox(
               height: heightOfScreen * 0.45,
             ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              child: _buildForm(),
+            Center(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: _buildForm(),
+              ),
             ),
           ],
         ),
@@ -156,6 +158,7 @@ class _PaymentBodyState extends State<PaymentBody> {
           height: defaultPadding,
         ),
         Container(
+          constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
           padding: EdgeInsets.symmetric(horizontal: 10.0),
           decoration: BoxDecoration(
               border: Border.all(color: AppColors.grey),
@@ -185,22 +188,30 @@ class _PaymentBodyState extends State<PaymentBody> {
           height: defaultPadding,
         ),
         _dropdownProvider == null
-            ? BankCardBlank(
-                isAdd: false,
+            ? Container(
+                constraints: BoxConstraints(minWidth: 100, maxWidth: 600),
+                child: BankCardBlank(
+                  isAdd: false,
+                ),
               )
-            : SizedBox(
-                height: 201,
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _dropdownProvider.banks.length,
-                    itemBuilder: (context, index) => Padding(
-                        padding: EdgeInsets.only(right: 5),
-                        child: BankCard(bank: _dropdownProvider.banks[index]))),
+            : Container(
+                constraints: BoxConstraints(minWidth: 100, maxWidth: 600),
+                child: SizedBox(
+                  height: 201,
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _dropdownProvider.banks.length,
+                      itemBuilder: (context, index) => Padding(
+                          padding: EdgeInsets.only(right: 5),
+                          child:
+                              BankCard(bank: _dropdownProvider.banks[index]))),
+                ),
               ),
         SizedBox(
           height: defaultPadding,
         ),
         Container(
+          constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
           padding: EdgeInsets.symmetric(horizontal: 10.0),
           decoration: BoxDecoration(
               border: Border.all(color: AppColors.grey),
@@ -230,41 +241,47 @@ class _PaymentBodyState extends State<PaymentBody> {
         SizedBox(
           height: defaultPadding,
         ),
-        CustomTextFormField(
-            textInputType: TextInputType.text,
-            textCapitalization: TextCapitalization.words,
-            labelText: "Filial",
-            initialValue: '',
-            border: Borders.customOutlineInputBorder(),
-            enabledBorder: Borders.customOutlineInputBorder(),
-            focusedBorder: Borders.customOutlineInputBorder(
-              color: const Color(0xFF655796),
-            ),
-            labelStyle: GoogleTextStyles.customTextStyle(),
-            hintTextStyle: GoogleTextStyles.customTextStyle(),
-            textStyle: GoogleTextStyles.customTextStyle(),
-            onChanged: (value) {
-              _paymentModel.filial = value.trim();
-            }),
+        Container(
+          constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
+          child: CustomTextFormField(
+              textInputType: TextInputType.text,
+              textCapitalization: TextCapitalization.words,
+              labelText: "Filial",
+              initialValue: '',
+              border: Borders.customOutlineInputBorder(),
+              enabledBorder: Borders.customOutlineInputBorder(),
+              focusedBorder: Borders.customOutlineInputBorder(
+                color: const Color(0xFF655796),
+              ),
+              labelStyle: GoogleTextStyles.customTextStyle(),
+              hintTextStyle: GoogleTextStyles.customTextStyle(),
+              textStyle: GoogleTextStyles.customTextStyle(),
+              onChanged: (value) {
+                _paymentModel.filial = value.trim();
+              }),
+        ),
         SizedBox(
           height: defaultPadding,
         ),
-        CustomTextFormField(
-            textInputType: TextInputType.text,
-            textCapitalization: TextCapitalization.sentences,
-            labelText: "Descrição da ação/compra",
-            initialValue: '',
-            border: Borders.customOutlineInputBorder(),
-            enabledBorder: Borders.customOutlineInputBorder(),
-            focusedBorder: Borders.customOutlineInputBorder(
-              color: const Color(0xFF655796),
-            ),
-            labelStyle: GoogleTextStyles.customTextStyle(),
-            hintTextStyle: GoogleTextStyles.customTextStyle(),
-            textStyle: GoogleTextStyles.customTextStyle(),
-            onChanged: (value) {
-              _paymentModel.description = value.trim();
-            }),
+        Container(
+          constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
+          child: CustomTextFormField(
+              textInputType: TextInputType.text,
+              textCapitalization: TextCapitalization.sentences,
+              labelText: "Descrição da ação/compra",
+              initialValue: '',
+              border: Borders.customOutlineInputBorder(),
+              enabledBorder: Borders.customOutlineInputBorder(),
+              focusedBorder: Borders.customOutlineInputBorder(
+                color: const Color(0xFF655796),
+              ),
+              labelStyle: GoogleTextStyles.customTextStyle(),
+              hintTextStyle: GoogleTextStyles.customTextStyle(),
+              textStyle: GoogleTextStyles.customTextStyle(),
+              onChanged: (value) {
+                _paymentModel.description = value.trim();
+              }),
+        ),
         SizedBox(
           height: defaultPadding,
         ),
@@ -278,6 +295,7 @@ class _PaymentBodyState extends State<PaymentBody> {
         ),
         currentPeopleLogged.directorship == 'ALL'
             ? Container(
+                constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                 decoration: BoxDecoration(
                     border: Border.all(color: AppColors.grey),
@@ -309,34 +327,37 @@ class _PaymentBodyState extends State<PaymentBody> {
                 height: defaultPadding,
               )
             : Container(),
-        CustomTextFormField(
-          textInputType: TextInputType.number,
-          textCapitalization: TextCapitalization.none,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            RealInputFormatter(centavos: true),
-          ],
-          labelText: "R\$",
-          initialValue: '',
-          hintText: '0,00',
-          border: Borders.customOutlineInputBorder(width: 2),
-          enabledBorder: Borders.customOutlineInputBorder(width: 2),
-          focusedBorder: Borders.customOutlineInputBorder(
-            color: const Color(0xFF655796),
-          ),
-          labelStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
-          hintTextStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
-          textStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
-          onChanged: (value) {
-            _paymentModel.amount =
-                UtilBrasilFields.converterMoedaParaDouble(value);
-          },
-          validator: (value) {
-            if (value.isEmpty) return 'Campo obrigatório';
+        Container(
+          constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
+          child: CustomTextFormField(
+            textInputType: TextInputType.number,
+            textCapitalization: TextCapitalization.none,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              RealInputFormatter(centavos: true),
+            ],
+            labelText: "R\$",
+            initialValue: '',
+            hintText: '0,00',
+            border: Borders.customOutlineInputBorder(width: 2),
+            enabledBorder: Borders.customOutlineInputBorder(width: 2),
+            focusedBorder: Borders.customOutlineInputBorder(
+              color: const Color(0xFF655796),
+            ),
+            labelStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
+            hintTextStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
+            textStyle: GoogleTextStyles.customTextStyle(fontSize: 24),
+            onChanged: (value) {
+              _paymentModel.amount =
+                  UtilBrasilFields.converterMoedaParaDouble(value);
+            },
+            validator: (value) {
+              if (value.isEmpty) return 'Campo obrigatório';
 
-            if (value == '0,00') return 'Valor necessário';
-            return null;
-          },
+              if (value == '0,00') return 'Valor necessário';
+              return null;
+            },
+          ),
         ),
         SizedBox(
           height: defaultPadding,

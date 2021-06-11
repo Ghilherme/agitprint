@@ -107,9 +107,12 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
             SizedBox(
               height: heightOfScreen * 0.45,
             ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              child: _buildForm(),
+            Center(
+              child: Container(
+                constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: _buildForm(),
+              ),
             ),
           ],
         ),
