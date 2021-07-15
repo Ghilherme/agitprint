@@ -85,14 +85,6 @@ class _AccountState extends State<Account> {
                             ),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
-                          /* IconButton(
-                            icon: Icon(
-                              Icons.notifications_none,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            onPressed: () => print("notification"),
-                          ), */
                         ],
                       ),
                       SizedBox(
@@ -101,54 +93,66 @@ class _AccountState extends State<Account> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              "Extrato",
-                              style: TextStyle(
-                                fontSize: _media.longestSide <= 775 ? 35 : 40,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                          Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  "Extrato",
+                                  style: TextStyle(
+                                    fontSize:
+                                        _media.longestSide <= 775 ? 35 : 40,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                          currentPeopleLogged.profiles.contains('admin1')
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.add,
-                                    color: Colors.white,
-                                    size: 36,
-                                  ),
-                                  onPressed: () => showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return UpdateBalanceDialog(
-                                        people: widget.people,
-                                        callback: callbackBalance,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : Container(),
-                          currentPeopleLogged.profiles.contains('admin2')
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.remove_sharp,
-                                    color: Colors.white,
-                                    size: 36,
-                                  ),
-                                  onPressed: () => showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return UpdateBalanceDialog(
-                                        people: widget.people,
-                                        callback: callbackBalance,
-                                        isAdd: false,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : Container(),
+                          Row(
+                            children: [
+                              currentPeopleLogged.profiles.contains('admin1')
+                                  ? IconButton(
+                                      icon: Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                        size: 45,
+                                      ),
+                                      onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return UpdateBalanceDialog(
+                                            people: widget.people,
+                                            callback: callbackBalance,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Container(),
+                              SizedBox(
+                                width: 50,
+                              ),
+                              currentPeopleLogged.profiles.contains('admin2')
+                                  ? IconButton(
+                                      icon: Icon(
+                                        Icons.remove,
+                                        color: Colors.white,
+                                        size: 45,
+                                      ),
+                                      onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return UpdateBalanceDialog(
+                                            people: widget.people,
+                                            callback: callbackBalance,
+                                            isAdd: false,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Container(),
+                            ],
+                          ),
                         ],
                       ),
                     ],

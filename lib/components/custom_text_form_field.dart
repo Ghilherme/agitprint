@@ -34,6 +34,7 @@ class CustomTextFormField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final int maxLines;
   final bool enabled;
+  final Function onFieldSubmitted;
 
   CustomTextFormField(
       {this.prefixIcon,
@@ -64,6 +65,7 @@ class CustomTextFormField extends StatelessWidget {
       this.height,
       this.initialValue,
       this.textCapitalization,
+      this.onFieldSubmitted,
       this.maxLines = 1,
       this.enabled = true});
 
@@ -83,6 +85,7 @@ class CustomTextFormField extends StatelessWidget {
           height: height,
           margin: textFormFieldMargin,
           child: TextFormField(
+            onFieldSubmitted: onFieldSubmitted,
             enabled: enabled,
             maxLines: maxLines,
             textCapitalization: textCapitalization,

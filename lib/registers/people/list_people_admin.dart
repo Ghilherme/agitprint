@@ -97,7 +97,7 @@ class ListPeopleAdmin extends StatelessWidget {
                 .doc(people.id)
                 .update({'status': Status.disabled});
           },
-          title: 'Deseja desabilitar o contato?',
+          title: 'Deseja desabilitar a conta?',
         ),
         title: people.name,
         subtitle: people.directorship +

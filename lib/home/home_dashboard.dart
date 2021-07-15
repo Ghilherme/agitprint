@@ -36,16 +36,21 @@ class _HomeDashboardState extends State<HomeDashboard> {
               )
             : null,
         actions: [
-          PopupMenuButton<String>(onSelected: (value) {
-            _generateExcelFile();
-          }, itemBuilder: (BuildContext context) {
-            return {'Gerar relatório'}.map((String choice) {
-              return PopupMenuItem<String>(
-                value: choice,
-                child: Text(choice),
-              );
-            }).toList();
-          })
+          PopupMenuButton<String>(
+              icon: Icon(
+                Icons.fact_check,
+              ),
+              onSelected: (value) {
+                _generateExcelFile();
+              },
+              itemBuilder: (BuildContext context) {
+                return {'Gerar relatório'}.map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Text(choice),
+                  );
+                }).toList();
+              })
         ],
         centerTitle: true,
         elevation: 0,

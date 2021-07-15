@@ -50,6 +50,7 @@ class _LoginState extends State<Login> {
                 child: Container(
                   height: heightOfScreen * 0.4,
                   width: widthOfScreen,
+                  constraints: BoxConstraints(maxWidth: 900),
                   color: AppColors.blue,
                   child: Container(
                     margin: EdgeInsets.only(left: 24),
@@ -60,7 +61,7 @@ class _LoginState extends State<Login> {
                           height: heightOfScreen * 0.1,
                         ),
                         Text(
-                          "agitprint",
+                          "AgitPrint",
                           style: Theme.of(context).textTheme.headline6.copyWith(
                                 fontSize: 20,
                                 fontStyle: FontStyle.italic,
@@ -101,8 +102,9 @@ class _LoginState extends State<Login> {
     ThemeData theme = Theme.of(context);
     return Form(
         key: _form,
-        child: Column(
-          children: <Widget>[
+        child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter buttonState) {
+          return Column(children: <Widget>[
             Container(
               constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
               child: CustomTextFormField(
@@ -157,6 +159,17 @@ class _LoginState extends State<Login> {
                 textStyle: GoogleTextStyles.customTextStyle(),
                 validator: (value) =>
                     value.isEmpty ? 'Senha obrigatório' : null,
+                onFieldSubmitted: (value) async {
+                  if (_form.currentState.validate()) {
+                    buttonState(() {
+                      _progressBarActive = true;
+                    });
+                    await signin();
+                    buttonState(() {
+                      _progressBarActive = false;
+                    });
+                  }
+                },
               ),
             ),
             SizedBox(
@@ -165,44 +178,41 @@ class _LoginState extends State<Login> {
             SizedBox(
               height: 8.0,
             ),
-            StatefulBuilder(
-                builder: (BuildContext context, StateSetter buttonState) {
-              return Container(
-                width: 180,
-                decoration: BoxDecoration(boxShadow: [
-                  BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
-                ]),
-                child: _progressBarActive
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.white,
-                        ),
-                      )
-                    : CustomButton(
-                        title: "Login",
-                        elevation: 8,
-                        textStyle: theme.textTheme.subtitle2.copyWith(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        color: AppColors.blue,
-                        height: 40,
-                        onPressed: () async {
-                          if (_form.currentState.validate()) {
-                            buttonState(() {
-                              _progressBarActive = true;
-                            });
-                            await signin();
-                            buttonState(() {
-                              _progressBarActive = false;
-                            });
-                          }
-                        },
+            Container(
+              width: 180,
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(blurRadius: 10, color: const Color(0xFFD6D7FB))
+              ]),
+              child: _progressBarActive
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.white,
                       ),
-              );
-            })
-          ],
-        ));
+                    )
+                  : CustomButton(
+                      title: "Login",
+                      elevation: 8,
+                      textStyle: theme.textTheme.subtitle2.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      color: AppColors.blue,
+                      height: 40,
+                      onPressed: () async {
+                        if (_form.currentState.validate()) {
+                          buttonState(() {
+                            _progressBarActive = true;
+                          });
+                          await signin();
+                          buttonState(() {
+                            _progressBarActive = false;
+                          });
+                        }
+                      },
+                    ),
+            ),
+          ]);
+        }));
   }
 
   Future<void> signin() async {
