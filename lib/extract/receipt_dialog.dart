@@ -160,42 +160,52 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
               height: defaultPadding,
             ),
             currentPeopleLogged.profiles.contains('user3')
-                ? ImagePickerSource(
-                    image: _paymentsModel.imageReceipt,
-                    callback: callbackImage,
-                    imageQuality: 40,
+                ? Container(
+                    child: ImagePickerSource(
+                      image: _paymentsModel.imageReceipt,
+                      callback: callbackImage,
+                      imageQuality: 40,
+                      heightImageNetwork: 500,
+                      widthImageNetwork: 400,
+                    ),
                   )
                 : _paymentsModel.imageReceipt.isEmpty
                     ? Container()
                     : Image(
-                        image:
-                            Image.network(_paymentsModel.imageReceipt).image),
-            _paymentsModel.imageReceipt.isEmpty
-                ? Container()
-                : StatefulBuilder(
-                    builder: (BuildContext context, StateSetter shareState) {
-                    return _progressBarActive
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              backgroundColor: Colors.white,
-                            ),
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () async {
-                              shareState(() {
-                                _progressBarActive = true;
-                              });
-                              await _urlFileShare(_paymentsModel.imageReceipt);
+                        image: Image.network(
+                        _paymentsModel.imageReceipt,
+                        width: 400,
+                        height: 500,
+                      ).image),
+            SizedBox(
+              height: defaultPadding,
+            ),
+            // _paymentsModel.imageReceipt.isEmpty
+            //     ? Container()
+            //     : StatefulBuilder(
+            //         builder: (BuildContext context, StateSetter shareState) {
+            //         return _progressBarActive
+            //             ? Center(
+            //                 child: CircularProgressIndicator(
+            //                   backgroundColor: Colors.white,
+            //                 ),
+            //               )
+            //             : ElevatedButton.icon(
+            //                 onPressed: () async {
+            //                   shareState(() {
+            //                     _progressBarActive = true;
+            //                   });
+            //                   await _urlFileShare(_paymentsModel.imageReceipt);
 
-                              shareState(() {
-                                _progressBarActive = false;
-                              });
-                            },
-                            icon: Icon(
-                              Icons.share,
-                            ),
-                            label: Text('Compartilhar'));
-                  }),
+            //                   shareState(() {
+            //                     _progressBarActive = false;
+            //                   });
+            //                 },
+            //                 icon: Icon(
+            //                   Icons.share,
+            //                 ),
+            //                 label: Text('Compartilhar'));
+            //       }),
             SizedBox(
               height: defaultPadding,
             ),

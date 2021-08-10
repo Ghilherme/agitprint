@@ -10,11 +10,15 @@ class ImagePickerSource extends StatefulWidget {
       this.image,
       this.callback,
       this.isAvatar = false,
-      this.imageQuality})
+      this.imageQuality,
+      this.heightImageNetwork,
+      this.widthImageNetwork})
       : super(key: key);
   final String image;
   final bool isAvatar;
   final int imageQuality;
+  final double heightImageNetwork;
+  final double widthImageNetwork;
 
   final Function(String) callback;
 
@@ -98,7 +102,7 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
             children: [
               _imageFile == null
                   ? Container(
-                      height: 200,
+                      height: 40,
                       child: ElevatedButton.icon(
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
@@ -113,7 +117,11 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
                         },
                       ),
                     )
-                  : Image(image: _previewImage()),
+                  : Image(
+                      image: _previewImage(),
+                      height: widget.heightImageNetwork ?? null,
+                      width: widget.widthImageNetwork ?? null,
+                    ),
               _imageFile == null
                   ? Container()
                   : Row(
@@ -155,7 +163,9 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
 
     if (_imageFile != null) {
       if (kIsWeb)
-        return Image.network(_imageFile.path).image;
+        return Image.network(
+          _imageFile.path,
+        ).image;
       else
         return Image.file(File(_imageFile.path)).image;
     } else if (_pickImageError != null)
