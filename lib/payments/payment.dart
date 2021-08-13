@@ -436,6 +436,10 @@ class _PaymentBodyState extends State<PaymentBody> {
                 );
               },
             ))
+        .then((value) => setState(() {
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => Payment()));
+            }))
         .catchError((error) => showDialog(
               context: context,
               builder: (context) {
