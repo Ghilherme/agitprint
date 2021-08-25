@@ -22,6 +22,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import '../constants.dart';
 import 'package:share/share.dart';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ReceiptDialog extends StatefulWidget {
   final PaymentsModel payment;
@@ -38,6 +40,7 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
   PaymentsModel _paymentsModel;
   String _fileReceiptUpload = '';
   ProvidersModel _providersModel;
+  Uint8List _bytesImgWeb;
 
   initState() {
     super.initState();
@@ -162,6 +165,7 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
             currentPeopleLogged.profiles.contains('user3')
                 ? Container(
                     child: ImagePickerSource(
+                      isRunningWeb: kIsWeb,
                       image: _paymentsModel.imageReceipt,
                       callback: callbackImage,
                       imageQuality: 40,
@@ -272,9 +276,10 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     }
   }
 
-  callbackImage(file) {
+  callbackImage(file, bytes) {
     setState(() {
       _fileReceiptUpload = file;
+      _bytesImgWeb = bytes;
     });
   }
 
@@ -290,8 +295,10 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
 
     if (_paymentsModel.status == Status.pending) {
       if (_fileReceiptUpload.isNotEmpty) {
+        //_paymentsModel.imageReceipt = await Uploads.uploadFileImage(refPath, _fileReceiptUpload);
+
         _paymentsModel.imageReceipt =
-            await Uploads.uploadFileImage(refPath, _fileReceiptUpload);
+            await Uploads.uploadFileImageBytes(refPath, _bytesImgWeb);
         _pendingPaymentQtnAdd -= 1;
       }
     }

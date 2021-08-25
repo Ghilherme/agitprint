@@ -27,7 +27,7 @@ class Updates {
 
       //atualiza pagamentos pendentes
       num _pendingPayment =
-          pendingPaymentQuantityAdd + people.data()['pagamentospendentes'];
+          pendingPaymentQuantityAdd + people.get('pagamentospendentes');
       transaction.update(ref, {'pagamentospendentes': _pendingPayment});
     });
   }

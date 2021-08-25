@@ -17,7 +17,7 @@ class Gets {
         .get()
         .then((value) {
       value.docs.forEach((element) {
-        return directorships.add(element.data()['nome']);
+        return directorships.add(element.get('nome'));
       });
     });
     return directorships;
@@ -31,7 +31,7 @@ class Gets {
         .get()
         .then((value) {
       value.docs.forEach((element) {
-        return categories.add(element.data()['nome']);
+        return categories.add(element.get('nome'));
       });
     });
     return categories;

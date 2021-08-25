@@ -32,36 +32,36 @@ class ProvidersModel {
 
   ProvidersModel.fromFirestore(QueryDocumentSnapshot snapshot) {
     this.id = snapshot.id;
-    this.name = snapshot.data()['nome'];
-    this.cpf = snapshot.data()['cpf'];
-    this.cnpj = snapshot.data()['cnpj'];
-    this.directorship = snapshot.data()['diretoria'];
-    this.categories = snapshot.data()['categorias'];
-    this.banks = getAccounts(snapshot.data()['contas']);
-    this.lastModification = snapshot.data()['atualizacao'] == null
+    this.name = snapshot.get('nome');
+    this.cpf = snapshot.get('cpf');
+    this.cnpj = snapshot.get('cnpj');
+    this.directorship = snapshot.get('diretoria');
+    this.categories = snapshot.get('categorias');
+    this.banks = getAccounts(snapshot.get('contas'));
+    this.lastModification = snapshot.get('atualizacao') == null
         ? null
-        : snapshot.data()['atualizacao'].toDate();
-    this.createdAt = snapshot.data()['criacao'] == null
+        : snapshot.get('atualizacao').toDate();
+    this.createdAt = snapshot.get('criacao') == null
         ? null
-        : snapshot.data()['criacao'].toDate();
-    this.status = snapshot.data()['status'];
+        : snapshot.get('criacao').toDate();
+    this.status = snapshot.get('status');
   }
 
   ProvidersModel.fromFirestoreDocument(DocumentSnapshot snapshot) {
     this.id = snapshot.id;
-    this.name = snapshot.data()['nome'];
-    this.cpf = snapshot.data()['cpf'];
-    this.cnpj = snapshot.data()['cnpj'];
-    this.directorship = snapshot.data()['diretoria'];
-    this.categories = snapshot.data()['categorias'];
-    this.banks = getAccounts(snapshot.data()['contas']);
-    this.lastModification = snapshot.data()['atualizacao'] == null
+    this.name = snapshot.get('nome');
+    this.cpf = snapshot.get('cpf');
+    this.cnpj = snapshot.get('cnpj');
+    this.directorship = snapshot.get('diretoria');
+    this.categories = snapshot.get('categorias');
+    this.banks = getAccounts(snapshot.get('contas'));
+    this.lastModification = snapshot.get('atualizacao') == null
         ? null
-        : snapshot.data()['atualizacao'].toDate();
-    this.createdAt = snapshot.data()['criacao'] == null
+        : snapshot.get('atualizacao').toDate();
+    this.createdAt = snapshot.get('criacao') == null
         ? null
-        : snapshot.data()['criacao'].toDate();
-    this.status = snapshot.data()['status'];
+        : snapshot.get('criacao').toDate();
+    this.status = snapshot.get('status');
   }
 
   ProvidersModel.empty() {
