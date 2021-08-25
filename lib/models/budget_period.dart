@@ -19,10 +19,10 @@ class BudgetPeriodModel {
   }
   BudgetPeriodModel.fromFirestore(QueryDocumentSnapshot snapshot) {
     this.period = '';
-    this.totalWastes = snapshot.data()['totalgastos'];
-    this.totalEarns = snapshot.data()['totalganhos'];
-    this.totalPurchases = snapshot.data()['totalcompras'];
-    this.totalActions = snapshot.data()['totalacoes'];
+    this.totalWastes = snapshot.get('totalgastos');
+    this.totalEarns = snapshot.get('totalganhos');
+    this.totalPurchases = snapshot.get('totalcompras');
+    this.totalActions = snapshot.get('totalacoes');
   }
 
   BudgetPeriodModel.empty() {

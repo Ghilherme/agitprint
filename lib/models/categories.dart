@@ -12,8 +12,8 @@ class CategoriesModel {
   }
   CategoriesModel.fromFirestore(QueryDocumentSnapshot snapshot) {
     this.id = snapshot.id;
-    this.name = snapshot.data()['nome'];
-    this.description = snapshot.data()['descricao'];
+    this.name = snapshot.get('nome');
+    this.description = snapshot.get('descricao');
   }
 
   CategoriesModel.empty() {

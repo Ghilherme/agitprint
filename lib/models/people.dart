@@ -41,41 +41,41 @@ class PeopleModel {
   }
   PeopleModel.fromFirestore(QueryDocumentSnapshot snapshot) {
     this.id = snapshot.id;
-    this.name = snapshot.data()['nome'];
-    this.email = snapshot.data()['email'];
-    this.balance = snapshot.data()['saldo'];
-    this.profiles = snapshot.data()['perfil'];
-    this.directorship = snapshot.data()['diretoria'];
-    this.regionalGroup = snapshot.data()['regional'];
-    this.pendingPayments = snapshot.data()['pagamentospendentes'];
-    this.imageAvatar = snapshot.data()['avatar'];
-    this.lastModification = snapshot.data()['atualizacao'] == null
+    this.name = snapshot.get('nome');
+    this.email = snapshot.get('email');
+    this.balance = snapshot.get('saldo');
+    this.profiles = snapshot.get('perfil');
+    this.directorship = snapshot.get('diretoria');
+    this.regionalGroup = snapshot.get('regional');
+    this.pendingPayments = snapshot.get('pagamentospendentes');
+    this.imageAvatar = snapshot.get('avatar');
+    this.lastModification = snapshot.get('atualizacao') == null
         ? null
-        : snapshot.data()['atualizacao'].toDate();
-    this.createdAt = snapshot.data()['criacao'] == null
+        : snapshot.get('atualizacao').toDate();
+    this.createdAt = snapshot.get('criacao') == null
         ? null
-        : snapshot.data()['criacao'].toDate();
-    this.budgetPeriod = getBudgetPeriod(snapshot.data()['orcamentoperiodo']);
-    this.status = snapshot.data()['status'];
+        : snapshot.get('criacao').toDate();
+    this.budgetPeriod = getBudgetPeriod(snapshot.get('orcamentoperiodo'));
+    this.status = snapshot.get('status');
   }
   PeopleModel.fromFirestoreDocument(DocumentSnapshot snapshot) {
     this.id = snapshot.id;
-    this.name = snapshot.data()['nome'];
-    this.email = snapshot.data()['email'];
-    this.balance = snapshot.data()['saldo'];
-    this.profiles = snapshot.data()['perfil'];
-    this.directorship = snapshot.data()['diretoria'];
-    this.regionalGroup = snapshot.data()['regional'];
-    this.pendingPayments = snapshot.data()['pagamentospendentes'];
-    this.imageAvatar = snapshot.data()['avatar'];
-    this.lastModification = snapshot.data()['atualizacao'] == null
+    this.name = snapshot.get('nome');
+    this.email = snapshot.get('email');
+    this.balance = snapshot.get('saldo');
+    this.profiles = snapshot.get('perfil');
+    this.directorship = snapshot.get('diretoria');
+    this.regionalGroup = snapshot.get('regional');
+    this.pendingPayments = snapshot.get('pagamentospendentes');
+    this.imageAvatar = snapshot.get('avatar');
+    this.lastModification = snapshot.get('atualizacao') == null
         ? null
-        : snapshot.data()['atualizacao'].toDate();
-    this.createdAt = snapshot.data()['criacao'] == null
+        : snapshot.get('atualizacao').toDate();
+    this.createdAt = snapshot.get('criacao') == null
         ? null
-        : snapshot.data()['criacao'].toDate();
-    this.budgetPeriod = getBudgetPeriod(snapshot.data()['orcamentoperiodo']);
-    this.status = snapshot.data()['status'];
+        : snapshot.get('criacao').toDate();
+    this.budgetPeriod = getBudgetPeriod(snapshot.get('orcamentoperiodo'));
+    this.status = snapshot.get('status');
   }
 
   PeopleModel.empty() {

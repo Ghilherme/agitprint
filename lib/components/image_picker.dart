@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:agitprint/components/google_text_styles.dart';
 import 'package:agitprint/constants.dart';
 import 'package:flutter/material.dart';
@@ -10,13 +11,19 @@ class ImagePickerSource extends StatefulWidget {
       this.image,
       this.callback,
       this.isAvatar = false,
-      this.imageQuality})
+      this.imageQuality,
+      this.heightImageNetwork,
+      this.widthImageNetwork,
+      this.isRunningWeb = false})
       : super(key: key);
   final String image;
   final bool isAvatar;
   final int imageQuality;
+  final double heightImageNetwork;
+  final double widthImageNetwork;
+  final bool isRunningWeb;
 
-  final Function(String) callback;
+  final Function(String, Uint8List) callback;
 
   @override
   _ImagePickerSourceState createState() => _ImagePickerSourceState(image);
@@ -25,7 +32,7 @@ class ImagePickerSource extends StatefulWidget {
 class _ImagePickerSourceState extends State<ImagePickerSource> {
   _ImagePickerSourceState(this.image);
   final String image;
-  PickedFile _imageFile;
+  XFile _imageFile;
   dynamic _pickImageError;
   final ImagePicker _picker = ImagePicker();
   String _retrieveDataError;
@@ -35,7 +42,7 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
   void initState() {
     super.initState();
     if (this.image != null && this.image.isNotEmpty)
-      _imageFile = PickedFile(this.image);
+      _imageFile = XFile(this.image);
   }
 
   @override
@@ -98,7 +105,7 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
             children: [
               _imageFile == null
                   ? Container(
-                      height: 200,
+                      height: 40,
                       child: ElevatedButton.icon(
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
@@ -113,7 +120,11 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
                         },
                       ),
                     )
-                  : Image(image: _previewImage()),
+                  : Image(
+                      image: _previewImage(),
+                      height: widget.heightImageNetwork ?? null,
+                      width: widget.widthImageNetwork ?? null,
+                    ),
               _imageFile == null
                   ? Container()
                   : Row(
@@ -155,7 +166,9 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
 
     if (_imageFile != null) {
       if (kIsWeb)
-        return Image.network(_imageFile.path).image;
+        return Image.network(
+          _imageFile.path,
+        ).image;
       else
         return Image.file(File(_imageFile.path)).image;
     } else if (_pickImageError != null)
@@ -182,26 +195,41 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
           child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.add_a_photo, size: 40, color: Colors.blue),
-                  onPressed: () {
-                    _onImageButtonPressed(ImageSource.camera, context: context);
-                    kIsWeb = false;
-                    Navigator.of(context).pop();
-                  },
-                ),
-                Container(width: 20),
-                IconButton(
-                  icon: Icon(Icons.collections, size: 40, color: Colors.blue),
-                  onPressed: () {
-                    _onImageButtonPressed(ImageSource.gallery,
-                        context: context);
-                    kIsWeb = false;
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
+              children: widget.isRunningWeb
+                  ? [
+                      IconButton(
+                        icon: Icon(Icons.collections,
+                            size: 40, color: Colors.blue),
+                        onPressed: () {
+                          _onImageButtonPressed(ImageSource.gallery,
+                              context: context);
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ]
+                  : [
+                      IconButton(
+                        icon: Icon(Icons.add_a_photo,
+                            size: 40, color: Colors.blue),
+                        onPressed: () {
+                          _onImageButtonPressed(ImageSource.camera,
+                              context: context);
+                          kIsWeb = false;
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      Container(width: 20),
+                      IconButton(
+                        icon: Icon(Icons.collections,
+                            size: 40, color: Colors.blue),
+                        onPressed: () {
+                          _onImageButtonPressed(ImageSource.gallery,
+                              context: context);
+                          kIsWeb = false;
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ],
             ),
           ),
         );
@@ -211,12 +239,15 @@ class _ImagePickerSourceState extends State<ImagePickerSource> {
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
     try {
-      final pickedFile = await _picker.getImage(
+      final pickedFile = await _picker.pickImage(
           source: source, imageQuality: widget.imageQuality);
       setState(() {
         _imageFile = pickedFile;
       });
-      if (pickedFile != null) widget.callback(_imageFile.path);
+      if (pickedFile != null) {
+        var bytes = await _imageFile.readAsBytes();
+        widget.callback(_imageFile.path, bytes);
+      }
     } catch (e) {
       setState(() {
         _pickImageError = e;

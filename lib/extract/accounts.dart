@@ -85,14 +85,6 @@ class _AccountState extends State<Account> {
                             ),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
-                          /* IconButton(
-                            icon: Icon(
-                              Icons.notifications_none,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            onPressed: () => print("notification"),
-                          ), */
                         ],
                       ),
                       SizedBox(
@@ -101,54 +93,66 @@ class _AccountState extends State<Account> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              "Extrato",
-                              style: TextStyle(
-                                fontSize: _media.longestSide <= 775 ? 35 : 40,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                          Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  "Extrato",
+                                  style: TextStyle(
+                                    fontSize:
+                                        _media.longestSide <= 775 ? 35 : 40,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                          currentPeopleLogged.profiles.contains('admin1')
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.add,
-                                    color: Colors.white,
-                                    size: 36,
-                                  ),
-                                  onPressed: () => showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return UpdateBalanceDialog(
-                                        people: widget.people,
-                                        callback: callbackBalance,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : Container(),
-                          currentPeopleLogged.profiles.contains('admin2')
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.remove_sharp,
-                                    color: Colors.white,
-                                    size: 36,
-                                  ),
-                                  onPressed: () => showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return UpdateBalanceDialog(
-                                        people: widget.people,
-                                        callback: callbackBalance,
-                                        isAdd: false,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : Container(),
+                          Row(
+                            children: [
+                              currentPeopleLogged.profiles.contains('admin1')
+                                  ? IconButton(
+                                      icon: Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                        size: 45,
+                                      ),
+                                      onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return UpdateBalanceDialog(
+                                            people: widget.people,
+                                            callback: callbackBalance,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Container(),
+                              SizedBox(
+                                width: 50,
+                              ),
+                              currentPeopleLogged.profiles.contains('admin2')
+                                  ? IconButton(
+                                      icon: Icon(
+                                        Icons.remove,
+                                        color: Colors.white,
+                                        size: 45,
+                                      ),
+                                      onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return UpdateBalanceDialog(
+                                            people: widget.people,
+                                            callback: callbackBalance,
+                                            isAdd: false,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Container(),
+                            ],
+                          ),
                         ],
                       ),
                     ],
@@ -164,18 +168,23 @@ class _AccountState extends State<Account> {
                         ? _media.height / 4
                         : _media.height / 4.3,
                     width: _media.width,
-                    child: ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      padding: EdgeInsets.only(bottom: 10),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 1,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: BalanceCard(people: widget.people),
-                        );
-                      },
+                    child: Center(
+                      child: ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        padding: EdgeInsets.only(bottom: 10),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 1,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: Container(
+                                constraints: BoxConstraints(
+                                    minWidth: 100, maxWidth: 500),
+                                child: BalanceCard(people: widget.people)),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -255,7 +264,7 @@ class _AccountState extends State<Account> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     StreamBuilder<QuerySnapshot>(
-                      stream: Gets.getPaymentsStream(widget.people.id),
+                      stream: Gets.getPaymentsStreamByPeople(widget.people.id),
                       builder: (context, snapshot) {
                         //Trata Load
                         if (snapshot.connectionState ==

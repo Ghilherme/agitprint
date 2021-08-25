@@ -22,12 +22,12 @@ class BankAccountModel {
   }
 
   BankAccountModel.fromFirestore(QueryDocumentSnapshot snapshot) {
-    this.bankCod = snapshot.data()['codbanco'];
-    this.bank = snapshot.data()['banco'];
-    this.agency = snapshot.data()['agencia'];
-    this.account = snapshot.data()['conta'];
-    this.savingAccount = snapshot.data()['contapoupanca'];
-    this.pix = Map<String, dynamic>.from(snapshot.data()['pix']);
+    this.bankCod = snapshot.get('codbanco');
+    this.bank = snapshot.get('banco');
+    this.agency = snapshot.get('agencia');
+    this.account = snapshot.get('conta');
+    this.savingAccount = snapshot.get('contapoupanca');
+    this.pix = Map<String, dynamic>.from(snapshot.get('pix'));
   }
 
   BankAccountModel.empty() {

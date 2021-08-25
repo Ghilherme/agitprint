@@ -36,24 +36,24 @@ class PaymentsModel {
   }
   PaymentsModel.fromFirestore(QueryDocumentSnapshot snapshot) {
     this.id = snapshot.id;
-    this.amount = snapshot.data()['valor'];
-    this.idProvider = snapshot.data()['fornecedor'];
-    this.idPeople = snapshot.data()['pessoa'];
-    this.description = snapshot.data()['descricao'];
-    this.type = snapshot.data()['tipo'];
-    this.filial = snapshot.data()['filial'];
-    this.providerName = snapshot.data()['nomefornecedor'];
-    this.imageReceipt = snapshot.data()['comprovante'];
-    this.createdAt = snapshot.data()['datasolicitacao'] == null
+    this.amount = snapshot.get('valor');
+    this.idProvider = snapshot.get('fornecedor');
+    this.idPeople = snapshot.get('pessoa');
+    this.description = snapshot.get('descricao');
+    this.type = snapshot.get('tipo');
+    this.filial = snapshot.get('filial');
+    this.providerName = snapshot.get('nomefornecedor');
+    this.imageReceipt = snapshot.get('comprovante');
+    this.createdAt = snapshot.get('datasolicitacao') == null
         ? null
-        : snapshot.data()['datasolicitacao'].toDate();
-    this.actionDate = snapshot.data()['dataacao'] == null
+        : snapshot.get('datasolicitacao').toDate();
+    this.actionDate = snapshot.get('dataacao') == null
         ? null
-        : snapshot.data()['dataacao'].toDate();
-    this.receiptDate = snapshot.data()['datacomprovante'] == null
+        : snapshot.get('dataacao').toDate();
+    this.receiptDate = snapshot.get('datacomprovante') == null
         ? null
-        : snapshot.data()['datacomprovante'].toDate();
-    this.status = snapshot.data()['status'];
+        : snapshot.get('datacomprovante').toDate();
+    this.status = snapshot.get('status');
   }
 
   PaymentsModel.empty() {
