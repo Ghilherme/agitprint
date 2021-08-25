@@ -59,7 +59,7 @@ class LinearPercentIndicator extends StatefulWidget {
       this.trailing,
       this.center,
       this.linearStrokeCap,
-      this.padding = const EdgeInsets.symmetric(horizontal: 10.0),
+      this.padding = const EdgeInsets.symmetric(horizontal: 2.0),
       this.alignment = MainAxisAlignment.start})
       : super(key: key) {
     if (percent < 0.0 || percent > 1.0) {

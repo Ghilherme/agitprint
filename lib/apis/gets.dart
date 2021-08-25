@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:agitprint/models/banks.dart';
+import 'package:agitprint/models/payments.dart';
 import 'package:agitprint/models/people.dart';
 import 'package:agitprint/models/providers.dart';
 import 'package:agitprint/models/status.dart';
@@ -16,7 +17,7 @@ class Gets {
         .get()
         .then((value) {
       value.docs.forEach((element) {
-        return directorships.add(element.data()['nome']);
+        return directorships.add(element.get('nome'));
       });
     });
     return directorships;
@@ -30,7 +31,7 @@ class Gets {
         .get()
         .then((value) {
       value.docs.forEach((element) {
-        return categories.add(element.data()['nome']);
+        return categories.add(element.get('nome'));
       });
     });
     return categories;
@@ -80,14 +81,28 @@ class Gets {
     return providers;
   }
 
-  static Stream<QuerySnapshot> getPaymentsStream(String idPeople) {
+  static Stream<QuerySnapshot> getPaymentsStreamByPeople(String idPeople) {
+    return getPaymentsByPeopleQuery(idPeople).snapshots();
+  }
+
+  static Query getPaymentsByPeopleQuery(String idPeople) {
     DocumentReference doc =
         FirebaseFirestore.instance.collection('pessoas').doc(idPeople);
     return FirebaseFirestore.instance
         .collection('pagamentos')
         .where('pessoa', isEqualTo: doc)
-        .orderBy('datasolicitacao')
-        .snapshots();
+        .orderBy('datasolicitacao');
+  }
+
+  static Future<List<PaymentsModel>> getPaymentsByPeople(
+      String idPeople) async {
+    List<PaymentsModel> payments = [];
+    await getPaymentsByPeopleQuery(idPeople).get().then((value) {
+      value.docs.forEach((element) {
+        return payments.add(PaymentsModel.fromFirestore(element));
+      });
+    });
+    return payments;
   }
 
   static Query getPeopleByDirectorshipQuery(

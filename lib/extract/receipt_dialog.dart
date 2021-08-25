@@ -22,6 +22,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import '../constants.dart';
 import 'package:share/share.dart';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ReceiptDialog extends StatefulWidget {
   final PaymentsModel payment;
@@ -38,6 +40,7 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
   PaymentsModel _paymentsModel;
   String _fileReceiptUpload = '';
   ProvidersModel _providersModel;
+  Uint8List _bytesImgWeb;
 
   initState() {
     super.initState();
@@ -160,42 +163,53 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
               height: defaultPadding,
             ),
             currentPeopleLogged.profiles.contains('user3')
-                ? ImagePickerSource(
-                    image: _paymentsModel.imageReceipt,
-                    callback: callbackImage,
-                    imageQuality: 40,
+                ? Container(
+                    child: ImagePickerSource(
+                      isRunningWeb: kIsWeb,
+                      image: _paymentsModel.imageReceipt,
+                      callback: callbackImage,
+                      imageQuality: 40,
+                      heightImageNetwork: 500,
+                      widthImageNetwork: 400,
+                    ),
                   )
                 : _paymentsModel.imageReceipt.isEmpty
                     ? Container()
                     : Image(
-                        image:
-                            Image.network(_paymentsModel.imageReceipt).image),
-            _paymentsModel.imageReceipt.isEmpty
-                ? Container()
-                : StatefulBuilder(
-                    builder: (BuildContext context, StateSetter shareState) {
-                    return _progressBarActive
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              backgroundColor: Colors.white,
-                            ),
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () async {
-                              shareState(() {
-                                _progressBarActive = true;
-                              });
-                              await _urlFileShare(_paymentsModel.imageReceipt);
+                        image: Image.network(
+                        _paymentsModel.imageReceipt,
+                        width: 400,
+                        height: 500,
+                      ).image),
+            SizedBox(
+              height: defaultPadding,
+            ),
+            // _paymentsModel.imageReceipt.isEmpty
+            //     ? Container()
+            //     : StatefulBuilder(
+            //         builder: (BuildContext context, StateSetter shareState) {
+            //         return _progressBarActive
+            //             ? Center(
+            //                 child: CircularProgressIndicator(
+            //                   backgroundColor: Colors.white,
+            //                 ),
+            //               )
+            //             : ElevatedButton.icon(
+            //                 onPressed: () async {
+            //                   shareState(() {
+            //                     _progressBarActive = true;
+            //                   });
+            //                   await _urlFileShare(_paymentsModel.imageReceipt);
 
-                              shareState(() {
-                                _progressBarActive = false;
-                              });
-                            },
-                            icon: Icon(
-                              Icons.share,
-                            ),
-                            label: Text('Compartilhar'));
-                  }),
+            //                   shareState(() {
+            //                     _progressBarActive = false;
+            //                   });
+            //                 },
+            //                 icon: Icon(
+            //                   Icons.share,
+            //                 ),
+            //                 label: Text('Compartilhar'));
+            //       }),
             SizedBox(
               height: defaultPadding,
             ),
@@ -262,9 +276,10 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
     }
   }
 
-  callbackImage(file) {
+  callbackImage(file, bytes) {
     setState(() {
       _fileReceiptUpload = file;
+      _bytesImgWeb = bytes;
     });
   }
 
@@ -280,8 +295,10 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
 
     if (_paymentsModel.status == Status.pending) {
       if (_fileReceiptUpload.isNotEmpty) {
+        //_paymentsModel.imageReceipt = await Uploads.uploadFileImage(refPath, _fileReceiptUpload);
+
         _paymentsModel.imageReceipt =
-            await Uploads.uploadFileImage(refPath, _fileReceiptUpload);
+            await Uploads.uploadFileImageBytes(refPath, _bytesImgWeb);
         _pendingPaymentQtnAdd -= 1;
       }
     }

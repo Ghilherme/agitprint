@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:agitprint/apis/gets.dart';
 import 'package:agitprint/apis/sets.dart';
 import 'package:agitprint/apis/uploads.dart';
@@ -57,6 +59,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
   List<DropdownMenuItem<String>> _itemsDropDown = [];
   String _dropdownDirectorship;
   String _password;
+  Uint8List _bytesImgWeb;
 
   initState() {
     super.initState();
@@ -107,9 +110,12 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
             SizedBox(
               height: heightOfScreen * 0.45,
             ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              child: _buildForm(),
+            Center(
+              child: Container(
+                constraints: BoxConstraints(minWidth: 100, maxWidth: 500),
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: _buildForm(),
+              ),
             ),
           ],
         ),
@@ -126,6 +132,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
         ),
         Center(
           child: ImagePickerSource(
+            isRunningWeb: kIsWeb,
             image: _peopleModel.imageAvatar,
             callback: callbackAvatar,
             isAvatar: true,
@@ -380,9 +387,10 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
             ));
   }
 
-  callbackAvatar(file) {
+  callbackAvatar(file, bytes) {
     setState(() {
       _fileAvatarUpload = file;
+      _bytesImgWeb = bytes;
     });
   }
 
@@ -419,7 +427,7 @@ class _PeopleAdminBodyState extends State<PeopleAdminBody> {
     //Se houve alteração na imagem, faz um novo upload
     if (_fileAvatarUpload.isNotEmpty)
       _peopleModel.imageAvatar =
-          await Uploads.uploadFileImage(refPath, _fileAvatarUpload);
+          await Uploads.uploadFileImageBytes(refPath, _bytesImgWeb);
 
     Sets.setPeople(_peopleModel, refDB)
         .then((value) => showDialog(
